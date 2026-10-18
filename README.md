@@ -62,6 +62,8 @@ For scripted installation, run `zsh scripts/install-app.sh`. This installs the e
 3. **Select an entry.** Read wrapped text, open a link, inspect formatted JSON/YAML, or preview an image.
 4. **Use it.** Choose **Copy** to put it back on the clipboard, or **Save to…** to export a file.
 
+Drag a history row or the **Drag** handle above its preview into another app. Images can also be dragged directly from the preview. Text is offered as the original plain text and a `.txt` file; images are offered as PNG data and a `.png` file. The receiving app chooses what it accepts. For part of a text entry, select text in the preview and drag the selection using macOS’s usual text behavior.
+
 Right-click any entry for copy, save, and delete actions. Use **Clean history…** to remove all entries.
 
 Closing the window leaves capture running. Click the menu bar clipboard icon to open history directly. Pause capture from the window or the **Clipboard Assistant** application menu; use that menu or **⌘Q** to quit.

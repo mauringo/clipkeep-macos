@@ -77,6 +77,8 @@ struct HistoryView: View {
                     } else {
                         List(filtered, selection: $selection) { entry in
                             HistoryRow(entry: entry).tag(entry.id)
+                                .onDrag { EntryDragProvider.make(for: entry) }
+                                .help("Drag this entry into another app or Finder")
                                 .contextMenu {
                                     Button("Copy") { monitor.copy(entry) }
                                     Button("Save to…") { monitor.save(entry) }
@@ -106,6 +108,11 @@ struct HistoryView: View {
                                     .font(.caption).foregroundStyle(.secondary)
                             }
                             Spacer()
+                            Label("Drag", systemImage: "hand.draw")
+                                .padding(6)
+                                .contentShape(Rectangle())
+                                .onDrag { EntryDragProvider.make(for: entry) }
+                                .help("Drag the original text or image into another app or Finder")
                             Button {
                                 monitor.copy(entry)
                                 copiedID = entry.id
@@ -130,6 +137,8 @@ struct HistoryView: View {
                                     .frame(width: max(0, geometry.size.width - 48),
                                            height: max(0, geometry.size.height - 48))
                                     .padding(24)
+                                    .contentShape(Rectangle())
+                                    .onDrag { EntryDragProvider.make(for: entry) }
                             }
                             Divider()
                             HStack {
@@ -190,5 +199,7 @@ private struct HistoryRow: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
         }.padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
     }
 }
