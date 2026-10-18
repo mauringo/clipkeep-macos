@@ -6,6 +6,7 @@ private typealias ViewState<Value> = SwiftUI.State<Value>
 
 struct HistoryView: View {
     @ObservedObject var monitor: ClipboardMonitor
+    let showSettings: () -> Void
     @ViewState private var selection: UUID?
     @ViewState private var search = ""
     @ViewState private var filter = EntryFilter.all
@@ -35,7 +36,7 @@ struct HistoryView: View {
                     .font(.title2).foregroundStyle(.tint)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Clipboard Assistant").font(.headline)
-                    Text("\(monitor.entries.count) of 100 entries · Saved on this Mac")
+                    Text("\(monitor.entries.count) of \(monitor.settings.maximumEntries) entries · \(monitor.settings.keepAfterRestart ? "Saved on this Mac" : "This session only")")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -48,6 +49,8 @@ struct HistoryView: View {
                 }
                 .help(monitor.isMonitoring ? "Pause capture" : "Resume capture")
                 .accessibilityLabel(monitor.isMonitoring ? "Pause capture" : "Resume capture")
+                Button(action: showSettings) { Image(systemName: "gearshape") }
+                    .help("Settings").accessibilityLabel("Settings")
             }
             .padding(20)
             Divider()
@@ -86,8 +89,10 @@ struct HistoryView: View {
                     HStack {
                         Text("Newest first").font(.caption).foregroundStyle(.secondary)
                         Spacer()
-                        Button("Clear history…") { confirmClear = true }
-                            .buttonStyle(.borderless).font(.caption)
+                        Button { confirmClear = true } label: {
+                            Label("Clean history…", systemImage: "trash")
+                        }
+                            .buttonStyle(.bordered).font(.caption)
                             .disabled(monitor.entries.isEmpty)
                     }.padding(.horizontal, 14).padding(.bottom, 12)
                 }.frame(minWidth: 260, idealWidth: 310, maxWidth: 400)
@@ -150,9 +155,9 @@ struct HistoryView: View {
         .onChange(of: monitor.entries.map(\.id)) { ids in
             if selection == nil || !ids.contains(selection!) { selection = ids.first }
         }
-        .alert("Clear clipboard history?", isPresented: $confirmClear) {
+        .alert("Clean clipboard history?", isPresented: $confirmClear) {
             Button("Cancel", role: .cancel) {}
-            Button("Clear history", role: .destructive) { monitor.clear() }
+            Button("Clean history", role: .destructive) { monitor.clear() }
         } message: {
             Text("This deletes all saved entries from this app. The current system clipboard stays available.")
         }

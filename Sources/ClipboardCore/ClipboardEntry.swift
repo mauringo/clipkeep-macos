@@ -32,36 +32,58 @@ public struct ClipboardEntry: Identifiable, Codable, Equatable {
 
 /// One atomic archive keeps metadata and image bytes consistent after interruption.
 public final class HistoryRepository {
-    public static let capacity = 100
     public private(set) var entries: [ClipboardEntry] = []
+    public private(set) var settings: HistorySettings
     private let archiveURL: URL
 
-    public init(archiveURL: URL) throws {
+    public init(archiveURL: URL, settings: HistorySettings = HistorySettings()) throws {
         self.archiveURL = archiveURL
-        if FileManager.default.fileExists(atPath: archiveURL.path) {
-            entries = Array(try JSONDecoder().decode([ClipboardEntry].self,
-                from: Data(contentsOf: archiveURL)).prefix(Self.capacity))
+        self.settings = settings
+        guard settings.keepAfterRestart else {
+            try removeArchive()
+            return
         }
+        if FileManager.default.fileExists(atPath: archiveURL.path) {
+            let saved = try JSONDecoder().decode([ClipboardEntry].self, from: Data(contentsOf: archiveURL))
+            entries = Array(saved.prefix(settings.maximumEntries))
+            if saved.count > entries.count { try persist(entries) }
+        }
+    }
+
+    /// Save/remove the archive before publishing a setting change so failures leave
+    /// the previous settings and in-memory history intact.
+    public func updateSettings(_ settings: HistorySettings) throws {
+        let updated = Array(entries.prefix(settings.maximumEntries))
+        if settings.keepAfterRestart { try persist(updated) }
+        else { try removeArchive() }
+        self.settings = settings
+        entries = updated
     }
 
     @discardableResult
     public func insert(_ entry: ClipboardEntry) throws -> Bool {
         guard entries.first.map({ !$0.hasSameContent(as: entry) }) ?? true else { return false }
-        let updated = Array(([entry] + entries).prefix(Self.capacity))
-        try persist(updated)
+        let updated = Array(([entry] + entries).prefix(settings.maximumEntries))
+        if settings.keepAfterRestart { try persist(updated) }
         entries = updated
         return true
     }
 
     public func remove(id: UUID) throws {
         let updated = entries.filter { $0.id != id }
-        try persist(updated)
+        if settings.keepAfterRestart { try persist(updated) }
         entries = updated
     }
 
     public func clear() throws {
-        try persist([])
+        if settings.keepAfterRestart { try persist([]) }
         entries = []
+    }
+
+    private func removeArchive() throws {
+        if FileManager.default.fileExists(atPath: archiveURL.path) {
+            try FileManager.default.removeItem(at: archiveURL)
+        }
     }
 
     private func persist(_ entries: [ClipboardEntry]) throws {

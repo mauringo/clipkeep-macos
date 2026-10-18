@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 @MainActor
 final class ClipboardMonitor: ObservableObject {
     @Published private(set) var entries: [ClipboardEntry] = []
+    @Published private(set) var settings: HistorySettings
     @Published var isMonitoring = true {
         didSet { lastChangeCount = NSPasteboard.general.changeCount }
     }
@@ -14,15 +15,26 @@ final class ClipboardMonitor: ObservableObject {
     private var lastChangeCount = -1
 
     init() {
+        let settings = HistorySettings.load()
+        self.settings = settings
         do {
             let directory = try FileManager.default.url(for: .applicationSupportDirectory,
                 in: .userDomainMask, appropriateFor: nil, create: true)
                 .appendingPathComponent("ClipboardAssistant", isDirectory: true)
-            repository = try HistoryRepository(archiveURL: directory.appendingPathComponent("history.json"))
+            repository = try HistoryRepository(archiveURL: directory.appendingPathComponent("history.json"),
+                                               settings: settings)
             entries = repository?.entries ?? []
         } catch {
             errorMessage = "Could not load clipboard history. Your existing archive has been preserved. \(error.localizedDescription)"
         }
+    }
+
+    func applySettings(_ settings: HistorySettings) throws {
+        guard let repository else { throw CocoaError(.fileReadUnknown) }
+        try repository.updateSettings(settings)
+        settings.save()
+        self.settings = settings
+        entries = repository.entries
     }
 
     func start() {
@@ -88,8 +100,13 @@ final class ClipboardMonitor: ObservableObject {
 
     func clear() {
         do {
-            try repository?.clear()
-            entries = repository?.entries ?? []
+            try cleanHistory()
         } catch { errorMessage = error.localizedDescription }
+    }
+
+    func cleanHistory() throws {
+        guard let repository else { throw CocoaError(.fileReadUnknown) }
+        try repository.clear()
+        entries = repository.entries
     }
 }

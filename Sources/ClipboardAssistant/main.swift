@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMenuDelegate {
     private var window: NSWindow!
+    private var settingsWindow: NSWindow?
     private var statusItem: NSStatusItem!
     private var monitor: ClipboardMonitor!
     private var pauseItem: NSMenuItem!
@@ -15,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         menu.addItem(.separator())
         menu.addItem(withTitle: "Show Clipboard History", action: #selector(showWindow), keyEquivalent: "0")
         pauseItem = menu.addItem(withTitle: "Pause Capture", action: #selector(toggleCapture), keyEquivalent: "")
+        menu.addItem(withTitle: "Settings…", action: #selector(showSettings), keyEquivalent: ",")
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit Clipboard Assistant", action: #selector(quit), keyEquivalent: "q")
         for item in menu.items { item.target = self }
@@ -41,7 +43,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
                           styleMask: [.titled, .closable, .miniaturizable, .resizable],
                           backing: .buffered, defer: false)
         window.title = "Clipboard Assistant"
-        window.contentView = NSHostingView(rootView: HistoryView(monitor: monitor))
+        window.contentView = NSHostingView(rootView: HistoryView(monitor: monitor,
+            showSettings: { [weak self] in self?.showSettings() }))
         window.isReleasedWhenClosed = false
         window.setFrameAutosaveName("ClipboardHistoryWindow")
         window.center()
@@ -61,6 +64,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     }
 
     @objc private func toggleCapture() { monitor.isMonitoring.toggle() }
+    @objc private func showSettings() {
+        if let settingsWindow, settingsWindow.isVisible {
+            settingsWindow.makeKeyAndOrderFront(nil)
+        } else {
+            let settings = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 528, height: 420),
+                                    styleMask: [.titled, .closable], backing: .buffered, defer: false)
+            settings.title = "Clipboard Settings"
+            settings.isReleasedWhenClosed = false
+            settings.contentView = NSHostingView(rootView: SettingsView(monitor: monitor,
+                dismiss: { [weak self] in self?.settingsWindow?.close() }))
+            settings.center()
+            settingsWindow = settings
+            settings.makeKeyAndOrderFront(nil)
+        }
+        NSApp.activate(ignoringOtherApps: true)
+    }
     @objc private func quit() { NSApp.terminate(nil) }
     @objc private func showAbout() { NSApp.orderFrontStandardAboutPanel(nil) }
 
