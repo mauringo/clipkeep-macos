@@ -24,13 +24,19 @@ Clipboard Assistant remembers your copied texts and images, ready to search, pre
 | ↩️ Readable text | Wrapped text and clickable links, including long URLs. |
 | 🧩 JSON & YAML | Automatically formatted previews with an **Original** switch for the exact source. |
 | 💾 Save to a file | Export text as UTF-8 `.txt` and images as `.png`, using the native macOS save dialog. |
-| ⏸️ Capture controls | Pause and resume from the window or the clipboard icon in the menu bar. |
+| ⏸️ Capture controls | Pause and resume from the window or the Clipboard Assistant application menu. |
 | ⚙️ History settings | Keep history across restarts or use memory-only capture; clean all entries with one button. |
 | 🏠 Stays on your Mac | No account, cloud sync, or network service. |
 
 **Your source stays intact.** JSON and YAML formatting only changes the preview. **Copy** and **Save to…** always use the original clipboard text, including whitespace and comments.
 
 ## Get started
+
+### Install without Terminal
+
+Double-click **Install Clipboard Assistant.app** in `dist`. It contains the complete app, installs it in **~/Applications**, and opens it. No administrator password or developer tools are required to install or run the built app. Updates quit the running copy before replacing it; history follows your existing retention settings.
+
+You can move the installer on its own, or copy **Clipboard Assistant.app** directly into Applications. Open the `.app` bundle in Finder, rather than the executable inside it, to launch without Terminal.
 
 ### Build from source
 
@@ -43,9 +49,11 @@ zsh scripts/build-app.sh
 open "dist/Clipboard Assistant.app"
 ```
 
-The app opens its history window and adds a **clipboard icon to your menu bar**. You can drag `dist/Clipboard Assistant.app` into **Applications** to keep it handy.
+The build also creates the self-contained Finder installer. The app opens its history window and adds a **clipboard icon to your menu bar**. You can drag `dist/Clipboard Assistant.app` into **Applications** to keep it handy.
 
 Already built the app? Just double-click **Clipboard Assistant.app** inside `dist`.
+
+For scripted installation, run `zsh scripts/install-app.sh`. This installs the existing build and opens it; it does not rebuild or download dependencies.
 
 ### Make yourself at home
 
@@ -56,11 +64,11 @@ Already built the app? Just double-click **Clipboard Assistant.app** inside `dis
 
 Right-click any entry for copy, save, and delete actions. Use **Clean history…** to remove all entries.
 
-Closing the window leaves capture running. Click the menu bar clipboard icon to reopen history, pause capture, or **Quit Clipboard Assistant**.
+Closing the window leaves capture running. Click the menu bar clipboard icon to open history directly. Pause capture from the window or the **Clipboard Assistant** application menu; use that menu or **⌘Q** to quit.
 
 ## History settings
 
-Open **Settings…** from the menu bar clipboard icon, click the **gear** in the history window, or press **⌘,**.
+Open **Settings…** from the **Clipboard Assistant** application menu, click the **gear** in the history window, or press **⌘,**.
 
 - **Keep history after restart or reboot:** enabled by default. Turn it off for memory-only history. Applying removes the saved archive immediately while keeping current entries available until you quit. The app then starts a new history each time it opens.
 - **Maximum entries:** choose any whole number from **1 to 1,000**. The default is **100**. Reducing the limit immediately removes the oldest entries when you click **Apply settings**.
@@ -103,7 +111,9 @@ swift test
 | `Sources/ClipboardAssistant` | SwiftUI interface, AppKit text previews, clipboard capture, menu bar, and file export. |
 | `Sources/ClipboardCore` | History settings, configurable limits, optional atomic persistence, and JSON/YAML preview formatting. |
 | `Tests/ClipboardCoreTests` | History persistence, eviction, duplicate handling, error recovery, and formatting checks. |
-| `scripts/build-app.sh` | Release build, `.app` packaging, dependency license, and local signing. |
+| `scripts/build-app.sh` | Release build, app and Finder installer packaging, dependency license, and local signing. |
+| `scripts/install-app.sh` | Install the built app in ~/Applications and launch it. |
+| `scripts/installer.applescript` | Finder installer interface, with no Terminal window. |
 
 When building inside a restricted development environment that prevents SwiftPM from starting its subprocess sandbox, use:
 

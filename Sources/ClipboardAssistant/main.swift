@@ -7,7 +7,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     private var settingsWindow: NSWindow?
     private var statusItem: NSStatusItem!
     private var monitor: ClipboardMonitor!
-    private var pauseItem: NSMenuItem!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         monitor = ClipboardMonitor()
@@ -15,7 +14,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         menu.addItem(withTitle: "About Clipboard Assistant", action: #selector(showAbout), keyEquivalent: "")
         menu.addItem(.separator())
         menu.addItem(withTitle: "Show Clipboard History", action: #selector(showWindow), keyEquivalent: "0")
-        pauseItem = menu.addItem(withTitle: "Pause Capture", action: #selector(toggleCapture), keyEquivalent: "")
+        menu.addItem(withTitle: "Pause Capture", action: #selector(toggleCapture), keyEquivalent: "")
         menu.addItem(withTitle: "Settings…", action: #selector(showSettings), keyEquivalent: ",")
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit Clipboard Assistant", action: #selector(quit), keyEquivalent: "q")
@@ -23,11 +22,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         menu.delegate = self
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Clipboard Assistant")
-        statusItem.menu = menu
+        // Open history directly when the menu-bar clipboard is clicked.
+        statusItem.button?.target = self
+        statusItem.button?.action = #selector(showWindow)
+        statusItem.button?.toolTip = "Open Clipboard Assistant"
 
         let appMenu = NSMenu()
         let appMenuItem = NSMenuItem()
-        appMenuItem.submenu = menu.copy() as? NSMenu
+        appMenuItem.submenu = menu
         appMenu.addItem(appMenuItem)
         let editItem = NSMenuItem()
         let editMenu = NSMenu(title: "Edit")
@@ -59,6 +61,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     }
 
     @objc private func showWindow() {
+        if window.isMiniaturized { window.deminiaturize(nil) }
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
