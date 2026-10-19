@@ -24,7 +24,7 @@ Clipboard Assistant remembers your copied texts and images, ready to search, pre
 | ↩️ Readable text | Wrapped text and clickable links, including long URLs. |
 | 🧩 JSON & YAML | Automatically formatted previews with an **Original** switch for the exact source. |
 | 💾 Save to a file or folder | Export text as UTF-8 `.txt` and images as `.png`; select several items, add titles, and save them together in a folder. |
-| ⏸️ Capture controls | Pause and resume from the window or the Clipboard Assistant application menu. |
+| ⏸️ Capture controls | Start or stop capture at the top of the menu-bar preview, or pause and resume from the full window and application menu. |
 | ⚙️ History settings | Keep history across restarts or use memory-only capture; clean all entries with one button. |
 | 🏠 Stays on your Mac | Local clipboard storage; GitHub is contacted for update checks. |
 
@@ -52,7 +52,7 @@ zsh scripts/build-app.sh
 open "dist/Clipboard Assistant.app"
 ```
 
-The build also creates the self-contained Finder installer. The app starts quietly with a **clipboard icon in your menu bar**. Click it for the compact history dropdown; choose **Expand** to open the full app window and show its Dock icon. You can drag `dist/Clipboard Assistant.app` into **Applications** to keep it handy.
+The build also creates the self-contained Finder installer. The app starts quietly with a **clipboard icon in your menu bar**. Click it for searchable history with a preview on the right; use the expand icon to open the full app window and show its Dock icon. You can drag `dist/Clipboard Assistant.app` into **Applications** to keep it handy.
 
 Already built the app? Just double-click **Clipboard Assistant.app** inside `dist`.
 
@@ -73,7 +73,7 @@ Choose **Save selected…** to export the selection. Enter a shared title (for e
 
 Right-click any entry for copy, save, and delete actions. Use **Clean history…** to remove all entries.
 
-Click the menu-bar clipboard icon to open a compact dropdown, like the Wi-Fi menu. Search and click an entry to copy it, or choose **Expand** for previews and export in the full app. The Dock icon appears while app windows are open and disappears when the last window closes; capture continues in the menu bar. Right-click the clipboard icon for app commands, or use the dropdown’s **…** menu to check for updates or quit.
+Click the menu-bar clipboard icon to open history with a preview on the right. Search and click an entry to preview its text or image. Each row has two icons on the left: **Copy** puts the original item on the clipboard and closes the dropdown with a short fade and upward motion, without adding another history entry; **Save** exports the original item to a file. Reduce Motion uses a fade only. Use **Start/Stop** at the top to control capture, or the expand icon to open the full app for multi-item selection and export. The Dock icon appears while app windows are open and disappears when the last window closes; capture continues in the menu bar. Right-click the clipboard icon for app commands, or use the dropdown’s **…** menu to check for updates or quit.
 
 ## Updates
 

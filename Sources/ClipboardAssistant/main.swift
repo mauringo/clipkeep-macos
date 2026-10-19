@@ -59,7 +59,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         window.center()
         window.delegate = self
         popover.behavior = .transient
-        popover.contentSize = NSSize(width: 380, height: 500)
+        popover.contentSize = NSSize(width: 760, height: 520)
         popover.contentViewController = NSHostingController(rootView: MenuBarView(
             monitor: monitor,
             expand: { [weak self] in self?.showWindow() },
@@ -68,7 +68,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
                 self?.popover.performClose(nil)
                 self?.checkForUpdates()
             },
-            dismiss: { [weak self] in self?.popover.performClose(nil) },
+            dismiss: { [weak self] in self?.dismissPreview() },
             quit: { [weak self] in self?.quit() }))
         monitor.start()
         updateChecker.start()
@@ -79,6 +79,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             updateChecker.automaticallyChecks ? .on : .off
         menu.items.first(where: { $0.action == #selector(toggleCapture) })?.title =
             monitor.isMonitoring ? "Pause Capture" : "Resume Capture"
+    }
+
+    private func dismissPreview() {
+        // The preview animates its content before closing. Avoid a second native
+        // animation, so its state can reset offscreen for the next opening.
+        popover.animates = false
+        popover.performClose(nil)
+        popover.animates = true
     }
 
     @objc private func togglePopover() {
