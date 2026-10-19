@@ -52,14 +52,14 @@ if /bin/zsh "$PROJECT_ROOT/scripts/update-from-source.sh" 9.0.0 "$DESTINATION" >
     print -u2 'Failed build was accepted'; exit 1
 fi
 [[ "$(cat "$DESTINATION/original")" == original ]]
-rg -q "Building Clipboard Assistant" "$TEST_DIR/failure.log"
+/usr/bin/grep -q "Building Clipboard Assistant" "$TEST_DIR/failure.log"
 # Wrong version must fail before the fixture build/installer runs.
 git -C "$FIXTURE" tag v8.0.0
 if /bin/zsh "$PROJECT_ROOT/scripts/update-from-source.sh" v8.0.0 "$DESTINATION" > "$TEST_DIR/mismatch.log" 2>&1; then
     print -u2 'Version mismatch was accepted'; exit 1
 fi
 [[ "$(cat "$DESTINATION/original")" == original ]]
-rg -q "Release version mismatch" "$TEST_DIR/mismatch.log"
+/usr/bin/grep -q "Release version mismatch" "$TEST_DIR/mismatch.log"
 if ! /bin/zsh "$PROJECT_ROOT/scripts/update-from-source.sh" v9.0.0 "$DESTINATION" > "$TEST_DIR/success.log" 2>&1; then
     cat "$TEST_DIR/success.log"; exit 1
 fi
