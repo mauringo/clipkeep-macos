@@ -1,7 +1,7 @@
 import Foundation
 
-public struct ClipboardEntry: Identifiable, Codable, Equatable {
-    public enum Kind: String, Codable { case text, image }
+public struct ClipboardEntry: Identifiable, Codable, Equatable, Sendable {
+    public enum Kind: String, Codable, Sendable { case text, image }
     public let id: UUID
     public let createdAt: Date
     public let kind: Kind

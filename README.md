@@ -23,7 +23,7 @@ Clipboard Assistant remembers your copied texts and images, ready to search, pre
 | 🖼️ Image previews | Preview copied images before saving them as PNG files. |
 | ↩️ Readable text | Wrapped text and clickable links, including long URLs. |
 | 🧩 JSON & YAML | Automatically formatted previews with an **Original** switch for the exact source. |
-| 💾 Save to a file | Export text as UTF-8 `.txt` and images as `.png`, using the native macOS save dialog. |
+| 💾 Save to a file or folder | Export text as UTF-8 `.txt` and images as `.png`; select several items, add titles, and save them together in a folder. |
 | ⏸️ Capture controls | Pause and resume from the window or the Clipboard Assistant application menu. |
 | ⚙️ History settings | Keep history across restarts or use memory-only capture; clean all entries with one button. |
 | 🏠 Stays on your Mac | Local clipboard storage; GitHub is contacted for update checks. |
@@ -65,7 +65,11 @@ For scripted installation, run `zsh scripts/install-app.sh`. This installs the e
 3. **Select an entry.** Read wrapped text, open a link, inspect formatted JSON/YAML, or preview an image.
 4. **Use it.** Choose **Copy** to put it back on the clipboard, or **Save to…** to export a file.
 
-Drag a history row or the **Drag** handle above its preview into another app. Images can also be dragged directly from the preview. Text is offered as the original plain text and a `.txt` file; images are offered as PNG data and a `.png` file. The receiving app chooses what it accepts. For part of a text entry, select text in the preview and drag the selection using macOS’s usual text behavior.
+Drag a row’s **three-line handle** or the **Drag** handle above its preview into another app. Images can also be dragged directly from the preview. Text is offered as the original plain text and a `.txt` file; images are offered as PNG data and a `.png` file. The receiving app chooses what it accepts. For part of a text entry, select text in the preview and drag the selection using macOS’s usual text behavior.
+
+In the full window, click an entry to show its preview. Use its checkbox, **⌘-click**, or **Shift-click** to select several entries; **Select all** selects the entries matching your current search and filter. A regular click returns to one selected entry. Hidden or deleted entries are removed from the selection.
+
+Choose **Save selected…** to export the selection. Enter a shared title (for example, `Project notes`) to create names such as `Project notes-001.txt` and `Project notes-002.png`. You can also enter an individual title for each item and see its filename before saving. Choose **Choose folder & save…**, then select an existing folder or create one. Files are saved directly into that folder in history order; original text and PNG bytes are preserved. Existing files are kept, and matching names receive a numbered suffix. After saving, choose **Show in Finder** to open the folder.
 
 Right-click any entry for copy, save, and delete actions. Use **Clean history…** to remove all entries.
 

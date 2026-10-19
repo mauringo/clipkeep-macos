@@ -7,7 +7,8 @@ private typealias ViewState<Value> = SwiftUI.State<Value>
 struct HistoryView: View {
     @ObservedObject var monitor: ClipboardMonitor
     let showSettings: () -> Void
-    @ViewState private var selection: UUID?
+    @ViewState private var selection = EntrySelection()
+    @ViewState private var exportRequest: ExportRequest?
     @ViewState private var search = ""
     @ViewState private var filter = EntryFilter.all
     @ViewState private var confirmClear = false
@@ -26,7 +27,17 @@ struct HistoryView: View {
     }
 
     private var selected: ClipboardEntry? {
-        filtered.first(where: { $0.id == selection })
+        filtered.first(where: { $0.id == selection.previewID })
+    }
+
+    private var selectedEntries: [ClipboardEntry] {
+        filtered.filter { selection.ids.contains($0.id) }
+    }
+
+    private func selectEntry(_ entry: ClipboardEntry) {
+        let modifiers = NSEvent.modifierFlags
+        selection.select(entry.id, visibleIDs: filtered.map(\.id),
+                         toggle: modifiers.contains(.command), range: modifiers.contains(.shift))
     }
 
     var body: some View {
@@ -53,6 +64,14 @@ struct HistoryView: View {
                     .help("Settings").accessibilityLabel("Settings")
             }
             .padding(20)
+            if selectedEntries.count > 1 {
+                HStack {
+                    Text("\(selectedEntries.count) items selected · Previewing one item")
+                        .font(.callout).foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Save selected…") { exportRequest = ExportRequest(entries: selectedEntries) }
+                }.padding(.horizontal, 20).padding(.bottom, 12)
+            }
             Divider()
             HSplitView {
                 VStack(spacing: 12) {
@@ -75,18 +94,59 @@ struct HistoryView: View {
                         }.multilineTextAlignment(.center).padding()
                         Spacer()
                     } else {
-                        List(filtered, selection: $selection) { entry in
-                            HistoryRow(entry: entry).tag(entry.id)
-                                .onDrag { EntryDragProvider.make(for: entry) }
-                                .help("Drag this entry into another app or Finder")
+                        List {
+                            ForEach(filtered) { entry in
+                                HStack(spacing: 8) {
+                                    Toggle("Select item", isOn: Binding(
+                                        get: { selection.ids.contains(entry.id) },
+                                        set: { _ in
+                                            selection.select(entry.id, visibleIDs: filtered.map(\.id), toggle: true)
+                                        }
+                                    ))
+                                    .toggleStyle(.checkbox).labelsHidden()
+                                    .accessibilityLabel("Select \(entry.text.map { String($0.prefix(40)) } ?? "image")")
+                                    Button { selectEntry(entry) } label: {
+                                        HistoryRow(entry: entry)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                    .help("Click to preview. ⌘-click to add an item; Shift-click to select a range.")
+                                    Image(systemName: "line.3.horizontal")
+                                        .padding(.horizontal, 4).padding(.vertical, 12)
+                                        .contentShape(Rectangle())
+                                        .onDrag { EntryDragProvider.make(for: entry) }
+                                        .help("Drag the original text or image")
+                                }
+                                .listRowBackground(selection.ids.contains(entry.id)
+                                    ? Color.accentColor.opacity(0.18) : Color.clear)
                                 .contextMenu {
                                     Button("Copy") { monitor.copy(entry) }
                                     Button("Save to…") { monitor.save(entry) }
+                                    if selection.ids.contains(entry.id), selectedEntries.count > 1 {
+                                        Button("Save selected…") { exportRequest = ExportRequest(entries: selectedEntries) }
+                                    }
                                     Divider()
                                     Button("Delete", role: .destructive) { monitor.remove(entry) }
                                 }
+                            }
                         }.listStyle(.sidebar)
+
                     }
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("\(selectedEntries.count) selected").font(.caption).foregroundStyle(.secondary)
+                            Spacer()
+                            Button("Select all") { selection.selectAll(visibleIDs: filtered.map(\.id)) }
+                                .font(.caption).disabled(filtered.isEmpty)
+                        }
+                        Button {
+                            exportRequest = ExportRequest(entries: selectedEntries)
+                        } label: {
+                            Label("Save selected…", systemImage: "folder.badge.plus")
+                                .frame(maxWidth: .infinity)
+                        }.buttonStyle(.borderedProminent).disabled(selectedEntries.isEmpty)
+                    }.padding(.horizontal, 14)
                     Divider()
                     HStack {
                         Text("Newest first").font(.caption).foregroundStyle(.secondary)
@@ -160,9 +220,16 @@ struct HistoryView: View {
             }
         }
         .frame(minWidth: 780, minHeight: 500)
-        .onAppear { selection = monitor.entries.first?.id }
-        .onChange(of: monitor.entries.map(\.id)) { ids in
-            if selection == nil || !ids.contains(selection!) { selection = ids.first }
+        .onAppear {
+            if selection.ids.isEmpty, let first = filtered.first {
+                selection.select(first.id, visibleIDs: filtered.map(\.id))
+            }
+        }
+        .onChange(of: filtered.map(\.id)) { ids in
+            selection.reconcile(visibleIDs: ids)
+        }
+        .sheet(item: $exportRequest) { request in
+            ExportSelectionView(entries: request.entries)
         }
         .alert("Clean clipboard history?", isPresented: $confirmClear) {
             Button("Cancel", role: .cancel) {}
