@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     private var applicationMenu: NSMenu!
     private var monitor: ClipboardMonitor!
     private let updateChecker = UpdateChecker()
+    private let shortcut = GlobalShortcut()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         monitor = ClipboardMonitor()
@@ -71,6 +72,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             },
             dismiss: { [weak self] in self?.dismissPreview() },
             quit: { [weak self] in self?.quit() }))
+        shortcut.action = { [weak self] in self?.togglePreview() }
+        shortcut.start()
         monitor.start()
         updateChecker.start()
     }
@@ -93,9 +96,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             statusItem.menu = applicationMenu
             button.performClick(nil)
             statusItem.menu = nil
-        } else if popover.isShown {
-            popover.performClose(nil)
         } else {
+            togglePreview()
+        }
+    }
+
+    private func togglePreview() {
+        guard let button = statusItem.button else { return }
+        if popover.isShown { previewPresentation.dismiss() }
+        else {
             NSApp.activate(ignoringOtherApps: true)
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             popover.contentViewController?.view.window?.makeKey()
@@ -122,7 +131,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             settings.title = "Clipboard Settings"
             settings.isReleasedWhenClosed = false
             settings.delegate = self
-            settings.contentView = NSHostingView(rootView: SettingsView(monitor: monitor,
+            settings.contentView = NSHostingView(rootView: SettingsView(monitor: monitor, shortcut: shortcut,
                 dismiss: { [weak self] in self?.settingsWindow?.close() }))
             settings.center()
             settingsWindow = settings

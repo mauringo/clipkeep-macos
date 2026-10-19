@@ -19,10 +19,10 @@ struct HistoryView: View {
     }
 
     private var filtered: [ClipboardEntry] {
-        monitor.entries.filter { entry in
+        monitor.displayEntries.filter { entry in
             (filter == .all || (filter == .text && entry.kind == .text) ||
              (filter == .image && entry.kind == .image)) &&
-            (search.isEmpty || (entry.text ?? "Image").localizedCaseInsensitiveContains(search))
+            (search.isEmpty || entry.searchableText.localizedCaseInsensitiveContains(search))
         }
     }
 
@@ -47,7 +47,7 @@ struct HistoryView: View {
                     .font(.title2).foregroundStyle(.tint)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Clipboard Assistant").font(.headline)
-                    Text("\(monitor.entries.count) of \(monitor.settings.maximumEntries) entries · \(monitor.settings.keepAfterRestart ? "Saved on this Mac" : "This session only")")
+                    Text("\(monitor.entries.count) entries · \(monitor.entries.filter(\.isPinned).count) pinned · \(monitor.settings.keepAfterRestart ? "Saved on this Mac" : "This session only")")
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -121,6 +121,7 @@ struct HistoryView: View {
                                 .listRowBackground(selection.ids.contains(entry.id)
                                     ? Color.accentColor.opacity(0.18) : Color.clear)
                                 .contextMenu {
+                                    Button(entry.isPinned ? "Unpin" : "Pin") { monitor.togglePin(entry) }
                                     Button("Copy") { monitor.copy(entry) }
                                     Button("Save to…") { monitor.save(entry) }
                                     if selection.ids.contains(entry.id), selectedEntries.count > 1 {
@@ -149,7 +150,7 @@ struct HistoryView: View {
                     }.padding(.horizontal, 14)
                     Divider()
                     HStack {
-                        Text("Newest first").font(.caption).foregroundStyle(.secondary)
+                        Text("Pinned first · Newest first").font(.caption).foregroundStyle(.secondary)
                         Spacer()
                         Button { confirmClear = true } label: {
                             Label("Clean history…", systemImage: "trash")
@@ -168,6 +169,10 @@ struct HistoryView: View {
                                     .font(.caption).foregroundStyle(.secondary)
                             }
                             Spacer()
+                            Button { monitor.togglePin(entry) } label: {
+                                Image(systemName: entry.isPinned ? "pin.fill" : "pin")
+                            }.help(entry.isPinned ? "Unpin item" : "Keep this item pinned")
+                                .accessibilityLabel(entry.isPinned ? "Unpin item" : "Pin item")
                             Label("Drag", systemImage: "hand.draw")
                                 .padding(6)
                                 .contentShape(Rectangle())
@@ -192,19 +197,7 @@ struct HistoryView: View {
                         if let text = entry.text {
                             TextPreview(text: text).id(entry.id)
                         } else if let data = entry.imageData, let image = NSImage(data: data) {
-                            GeometryReader { geometry in
-                                Image(nsImage: image).resizable().scaledToFit()
-                                    .frame(width: max(0, geometry.size.width - 48),
-                                           height: max(0, geometry.size.height - 48))
-                                    .padding(24)
-                                    .contentShape(Rectangle())
-                                    .onDrag { EntryDragProvider.make(for: entry) }
-                            }
-                            Divider()
-                            HStack {
-                                Text("PNG image · \(ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file))")
-                                Spacer()
-                            }.font(.caption).foregroundStyle(.secondary).padding(14)
+                            ImageEntryPreview(entry: entry, image: image, monitor: monitor)
                         }
                     } else {
                         Spacer()
@@ -262,8 +255,10 @@ struct HistoryRow: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(entry.text.map { String($0.prefix(300)).replacingOccurrences(of: "\n", with: " ") } ?? "Copied image")
                     .lineLimit(2).font(.system(size: 13, weight: .medium))
-                Text(entry.createdAt.formatted(date: .omitted, time: .shortened))
-                    .font(.caption).foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    if entry.isPinned { Image(systemName: "pin.fill").accessibilityLabel("Pinned") }
+                    Text(entry.createdAt.formatted(date: .omitted, time: .shortened))
+                }.font(.caption).foregroundStyle(.secondary)
             }
         }.padding(.vertical, 6)
             .frame(maxWidth: .infinity, alignment: .leading)

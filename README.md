@@ -16,7 +16,7 @@ Keep the things you copy. Find them again. Save what matters.
 [![Swift](https://img.shields.io/badge/Swift-native-F05138?logo=swift&logoColor=white)](Package.swift)
 [![Homebrew tap](https://img.shields.io/badge/Homebrew-personal%20tap-FBB040?logo=homebrew&logoColor=white)](https://github.com/mauringo/homebrew-tap)
 
-[Install](#install-with-homebrew-recommended) · [Update](#update-from-terminal-recommended) · [Releases](https://github.com/mauringo/clipkeep-macos/releases) · [Report an issue](https://github.com/mauringo/clipkeep-macos/issues)
+[Install](#install-with-homebrew-recommended) · [Update](#update-from-terminal-recommended) · [Releases](https://github.com/mauringo/clipkeep-macos/releases) · [Suggest a feature](https://github.com/mauringo/clipkeep-macos/issues/new?template=feature_request.yml) · [Report an issue](https://github.com/mauringo/clipkeep-macos/issues)
 
 **Native macOS app · Local storage · Text & images · No account required**
 
@@ -24,21 +24,45 @@ Keep the things you copy. Find them again. Save what matters.
 
 ![Clipboard Assistant v1.6 menu-bar dropdown with Start/Stop capture, Copy and Save icons on each row, and a text preview on the right](docs/images/clipboard-assistant-v1.6-menu-bar.png)
 
-Clipboard Assistant remembers your copied texts and images, ready to search, preview, copy again, or save to a file. Keep **100 entries by default**, choose a limit from **1 to 1,000**, and decide whether history survives a restart. It lives in your macOS menu bar and keeps working when you close its window.
+Clipboard Assistant remembers your copied texts and images, ready to search, preview, copy again, or save to a file. Keep **100 recent entries by default**, choose a limit from **1 to 1,000** plus pinned favorites, and decide whether history survives a restart. It lives in your macOS menu bar and keeps working when you close its window.
 
 ## Small app. Useful everyday details.
 
-| Feature | What you get |
+### Find it. Preview it. Use it.
+
+| Feature | What you can do |
 | --- | --- |
-| 📋 Clipboard history | Text and image entries, newest first, with a configurable limit of 1–1,000 (default: 100). |
-| 🔎 Search & filters | Search copied text or switch between text and images. |
-| 🖼️ Image previews | Preview copied images before saving them as PNG files. |
-| ↩️ Readable text | Wrapped text and clickable links, including long URLs. |
-| 🧩 JSON & YAML | Automatically formatted previews with an **Original** switch for the exact source. |
-| 💾 Save to a file or folder | Export text as UTF-8 `.txt` and images as `.png`; select several items, add titles, and save them together in a folder. |
-| ⏸️ Capture controls | Start or stop capture at the top of the menu-bar preview, or pause and resume from the full window and application menu. |
-| ⚙️ History settings | Keep history across restarts or use memory-only capture; clean all entries with one button. |
-| 🏠 Stays on your Mac | Local clipboard storage; GitHub is contacted for update checks. |
+| ⌨️ **Your shortcut, your choice** | Record your own global shortcut in Settings. Open history, type to search, use ↑/↓ to select, and press Return to copy and close. |
+| 📋 **Clipboard history** | Keep text and PNG/TIFF images, with a configurable limit of 1–1,000 recent entries. |
+| 📌 **Pinned favorites** | Keep useful snippets and images at the top, outside the recent-history limit. Pins follow your history-retention setting. |
+| 🔎 **Search and filters** | Find copied text or recognized image text; filter the full history by text or images. |
+| 👀 **Preview before copying** | Read wrapped text, follow links, and inspect images on the right of the menu-bar dropdown or in the full window. |
+| 🧩 **Readable JSON and YAML** | Inspect formatted content and switch to the exact original. Copy and Save preserve the source. |
+| 🖼️ **Text from images** | Recognize text on your Mac, search it, select it, and copy it separately from the original image. |
+
+### Save what matters.
+
+| Feature | What you can do |
+| --- | --- |
+| 💾 **Copy or save in one click** | Use the two icons beside each entry to copy and close, or save the original as UTF-8 text or PNG. |
+| 📁 **Titled batch exports** | Select multiple items, choose a shared title or individual names, preview filenames, and save everything into one folder. Existing files are preserved. |
+| 🖱️ **Drag into your workflow** | Drag original text or images into another app or Finder. |
+| ✨ **A native macOS experience** | Use a menu-bar preview, a full history window, familiar controls, and a short closing animation that respects Reduce Motion. |
+
+### Keep control.
+
+| Feature | What you can do |
+| --- | --- |
+| 🏠 **Local storage** | Keep clipboard history and recognized text on your Mac. No account is required. |
+| 🛡️ **Capture exclusions** | Skip selected apps and clipboard content marked confidential or temporary by its source. Unmarked sensitive content still needs care. |
+| ⏯️ **Start and stop capture** | Control capture at the top of the preview or in the full app. |
+| ⚙️ **Choose what survives a restart** | Save history between sessions or keep it in memory only. Clean history whenever you want. |
+| 🚀 **Launch at login** | Start quietly in the menu bar when you sign in. |
+| 🍺 **Update from Terminal** | Use Homebrew's prebuilt releases. The optional in-app updater also downloads and verifies a compatible prebuilt app. |
+
+> **What would make your clipboard more useful?**
+> [**Suggest a feature →**](https://github.com/mauringo/clipkeep-macos/issues/new?template=feature_request.yml)
+> Tell us what you want to copy, find, or save more easily. Small improvements are welcome—we want to keep the app simple and native.
 
 **Your source stays intact.** JSON and YAML formatting only changes the preview. **Copy** and **Save to…** always use the original clipboard text, including whitespace and comments.
 
@@ -87,6 +111,28 @@ Already built the app? Just double-click **Clipboard Assistant.app** inside `dis
 
 For scripted installation, run `zsh scripts/install-app.sh`. This installs the existing build and opens it; it does not rebuild or download dependencies.
 
+### Your keyboard shortcut
+
+The default shortcut is **⌃⌥V** (Control–Option–V). In **Settings → Keyboard shortcut**, click the recorded combination and press your own shortcut with Command, Option, or Control. Press Escape to cancel recording, use **Reset shortcut** to restore the default, or turn the shortcut off. If macOS reports a conflict, the previous shortcut is kept.
+
+While the menu-bar search field is focused, type to filter, use **↑/↓** to select, and press **Return** to copy the original item and close. Arrow keys in the text preview keep their usual text-selection behavior.
+
+### Pin your favorites
+
+Click the **pin** in an item's preview, or right-click its row and choose **Pin**. Pinned items appear first and stay outside the recent-history limit. Unpinning reapplies the limit, so an old item may be removed immediately. Pins survive restarts when **Keep history after restart or reboot** is enabled; session-only mode still clears everything on quit. **Clean history** removes pins too.
+
+### Read text from images
+
+Image previews have an **Image / Text** switch and a **Copy text** button. Apple Vision recognizes text locally in the background, including images already in history. Search matches that recognized text. Copying or saving the image itself still uses the original PNG.
+
+Disable **Settings → Recognize text in images** to stop new recognition; existing recognized text remains stored with its image. If recognition fails, the Text view offers **Try again**.
+
+### Choose what to capture
+
+Open **Settings → Capture & privacy** to exclude an app or change whether confidential and temporary clipboard markers are respected. Marker filtering is enabled by default. Exclusions apply to future copies and use the clipboard's source identifier when supplied, otherwise the app active when the clipboard is checked. This fallback cannot reliably identify every source. Existing history is not removed when an exclusion is added.
+
+Apps must mark their sensitive clipboard data for the marker filter to recognize it; it cannot detect every password or secret. Exclude the source app or stop capture when needed.
+
 ### Make yourself at home
 
 1. **Copy something.** Text and clipboard images appear automatically while capture is active.
@@ -130,9 +176,11 @@ Saved history survives an app replacement. Session-only history is lost when qui
 
 ### Optional in-app updater
 
-**… → Check for Updates… → Install Update** remains available for users who prefer it. It downloads the stable release's source and builds on your Mac, so it can take longer and requires **Apple Command Line Tools with Swift 6+**, internet access, and a writable installation destination. Homebrew and the Finder installer use prebuilt apps instead.
+**… → Check for Updates… → Install Update** remains available for manual installations. Starting with **v1.7.0**, it downloads a compatible prebuilt app from the stable GitHub release, verifies its published SHA-256 digest, size, bundle identity, version, and code integrity, then installs and reopens it. No Swift compiler is needed. A release without a compatible verified asset cannot be installed through this route. For Homebrew installations, keep using the Terminal update command.
 
-Automatic checks run on launch and daily while enabled. They request release metadata from GitHub; clipboard contents are never included. Starting with v1.6.1, protected, renamed, or macOS App Translocation copies install updates into **~/Applications/Clipboard Assistant.app**. Writable copies with the standard name update in place. Build logs are in **~/Library/Application Support/ClipboardAssistant/Updates/update.log**.
+Automatic checks are **off by default for new installations**; existing preferences are preserved. When enabled, checks run on launch and daily and request release metadata from GitHub; clipboard contents are never included. Protected, renamed, or macOS App Translocation copies install updates into **~/Applications/Clipboard Assistant.app**. Writable copies with the standard name update in place.
+
+Releases remain ad hoc signed, not Developer ID signed or Apple notarized. Checksum and code-integrity verification do not provide Apple publisher verification. Versions through v1.6.2 use the older source-building updater; Homebrew or the Finder installer avoids that build when upgrading to v1.7.0.
 
 ### If updating says “Move the app before updating”
 
@@ -144,7 +192,7 @@ Open **Settings…** from the menu-bar dropdown, the **Clipboard Assistant** app
 
 - **Start at login:** use the switch to launch quietly in the menu bar when you sign in to macOS. Install the app in Applications before enabling it. If macOS requires approval, use **Open Login Items Settings…**. The switch reflects macOS registration status; pending approval is shown explicitly.
 - **Keep history after restart or reboot:** enabled by default. This switch applies immediately. Turn it off for memory-only history. Switching it off removes the saved archive immediately while keeping current entries available until you quit. The app then starts a new history each time it opens.
-- **Maximum entries:** choose any whole number from **1 to 1,000**. The default is **100**. Reducing the limit immediately removes the oldest entries when you click **Apply limit**.
+- **Maximum entries:** choose any whole number from **1 to 1,000** recent unpinned entries. The default is **100**. Pinned items are kept in addition. Reducing the limit removes the oldest unpinned entries when you click **Apply limit**.
 - **Clean history…:** remove all current entries from the app, including saved history, after confirmation. This button is available in both Settings and the main window.
 
 Settings are remembered across restarts even when clipboard history is kept only in memory. Turn on **Start at login** to start capture automatically after signing in.
@@ -167,8 +215,8 @@ When **Keep history after restart or reboot** is enabled, history is stored at:
 
 - The clipboard is checked every **half second**. Very rapid clipboard changes may be missed.
 - The existing clipboard is captured when the app starts. Changes observed while paused are skipped.
-- Consecutive identical copies share one history entry. When history exceeds your configured limit, the oldest is removed.
-- The app captures plain text and PNG/TIFF clipboard images. Copying a file in Finder does not import its contents.
+- Consecutive identical copies share one history entry. When recent history exceeds your configured limit, the oldest unpinned entry is removed.
+- The app captures plain text and PNG/TIFF clipboard images, subject to capture exclusions and clipboard privacy markers. Copying a file in Finder does not import its contents.
 - JSON and YAML mappings/lists are formatted automatically. Unrecognized or invalid input remains readable as plain text. YAML comments remain available in **Original** mode.
 - The build targets your Mac’s processor architecture and uses a local ad hoc signature. Public distribution without Gatekeeper friction requires Developer ID signing and notarization. Use `zsh scripts/build-app.sh --universal` to build both architectures.
 

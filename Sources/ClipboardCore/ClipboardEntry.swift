@@ -7,6 +7,25 @@ public struct ClipboardEntry: Identifiable, Codable, Equatable, Sendable {
     public let kind: Kind
     public let text: String?
     public let imageData: Data?
+    public var isPinned: Bool = false
+    public var recognizedText: String?
+
+    public var searchableText: String { text ?? recognizedText ?? "Copied image" }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, createdAt, kind, text, imageData, isPinned, recognizedText
+    }
+
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        id = try values.decode(UUID.self, forKey: .id)
+        createdAt = try values.decode(Date.self, forKey: .createdAt)
+        kind = try values.decode(Kind.self, forKey: .kind)
+        text = try values.decodeIfPresent(String.self, forKey: .text)
+        imageData = try values.decodeIfPresent(Data.self, forKey: .imageData)
+        isPinned = try values.decodeIfPresent(Bool.self, forKey: .isPinned) ?? false
+        recognizedText = try values.decodeIfPresent(String.self, forKey: .recognizedText)
+    }
 
     public init(text: String, createdAt: Date = Date()) {
         id = UUID()
@@ -45,7 +64,7 @@ public final class HistoryRepository {
         }
         if FileManager.default.fileExists(atPath: archiveURL.path) {
             let saved = try JSONDecoder().decode([ClipboardEntry].self, from: Data(contentsOf: archiveURL))
-            entries = Array(saved.prefix(settings.maximumEntries))
+            entries = Self.retained(saved, limit: settings.maximumEntries)
             if saved.count > entries.count { try persist(entries) }
         }
     }
@@ -53,7 +72,7 @@ public final class HistoryRepository {
     /// Save/remove the archive before publishing a setting change so failures leave
     /// the previous settings and in-memory history intact.
     public func updateSettings(_ settings: HistorySettings) throws {
-        let updated = Array(entries.prefix(settings.maximumEntries))
+        let updated = Self.retained(entries, limit: settings.maximumEntries)
         if settings.keepAfterRestart { try persist(updated) }
         else { try removeArchive() }
         self.settings = settings
@@ -63,10 +82,37 @@ public final class HistoryRepository {
     @discardableResult
     public func insert(_ entry: ClipboardEntry) throws -> Bool {
         guard entries.first.map({ !$0.hasSameContent(as: entry) }) ?? true else { return false }
-        let updated = Array(([entry] + entries).prefix(settings.maximumEntries))
+        let updated = Self.retained([entry] + entries, limit: settings.maximumEntries)
         if settings.keepAfterRestart { try persist(updated) }
         entries = updated
         return true
+    }
+
+    /// Pins are exempt from the recent-history limit. Unpinning reapplies that limit.
+    public func setPinned(_ pinned: Bool, id: UUID) throws {
+        guard let index = entries.firstIndex(where: { $0.id == id }) else { return }
+        var updated = entries
+        updated[index].isPinned = pinned
+        updated = Self.retained(updated, limit: settings.maximumEntries)
+        if settings.keepAfterRestart { try persist(updated) }
+        entries = updated
+    }
+
+    public func setRecognizedText(_ text: String, id: UUID) throws {
+        guard let index = entries.firstIndex(where: { $0.id == id && $0.kind == .image }) else { return }
+        var updated = entries
+        updated[index].recognizedText = text
+        if settings.keepAfterRestart { try persist(updated) }
+        entries = updated
+    }
+
+    private static func retained(_ entries: [ClipboardEntry], limit: Int) -> [ClipboardEntry] {
+        var recentCount = 0
+        return entries.filter { entry in
+            if entry.isPinned { return true }
+            recentCount += 1
+            return recentCount <= limit
+        }
     }
 
     public func remove(id: UUID) throws {

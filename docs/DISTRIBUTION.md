@@ -5,7 +5,7 @@
 1. Update `CFBundleShortVersionString` and `CFBundleVersion` in `Resources/Info.plist`.
 2. Run `swift test`, then `zsh scripts/build-app.sh --universal`.
 3. Zip the app and optional Finder installer with `ditto -c -k --sequesterRsrc --keepParent`.
-4. Publish a stable GitHub release tagged `v<CFBundleShortVersionString>` with the archives and SHA-256 checksums. The source at that tag must have the same version. The app updater builds this exact tag; do not move published tags.
+4. Publish a stable GitHub release tagged `v<CFBundleShortVersionString>` with the archives and SHA-256 checksums. The source and app at that tag must have the same version. The current in-app updater uses the matching release archive and GitHub asset SHA-256 digest; legacy updaters build the tag. Do not move published tags or replace release archives.
 5. Update the cask URL, version, and checksum for each release.
 
 Clipboard data is not included in release archives. Bundled license notices include Mauro (mauringo)’s MIT license and Yams’ upstream license.
@@ -16,7 +16,11 @@ The first v1.3.0 binary release is Apple Silicon only: the local Swift 6.4 toolc
 
 Current release builds are ad hoc signed, not Developer ID signed or notarized. Downloaded builds may be blocked by Gatekeeper. There is no signing identity installed on the release machine. A smooth binary release needs Apple Developer Program membership, a Developer ID Application certificate, hardened runtime signing, notarization using `xcrun notarytool`, and stapling using `xcrun stapler`. Both the app and any distributed installer need an appropriate signing/notarization process. Never remove quarantine attributes automatically.
 
-Source-built updates are locally compiled and ad hoc signed; they are not notarized vendor binaries. Users need Apple Command Line Tools, Swift 6+, network access, and a writable install directory. Starting with v1.6.1, protected, renamed, or App Translocation copies install updates into `~/Applications/Clipboard Assistant.app`; writable copies with the standard name update in place. Builds execute source and build tooling from the trusted project release and its dependency.
+Starting with v1.7.0, the optional in-app updater downloads a matching stable release asset from this project's GitHub releases. It verifies the asset's SHA-256 digest and size, rejects unexpected archive paths and symlinks, and checks the extracted app's bundle identifier, version, executable name, and code integrity before using the bundled installer. No Swift compiler is required for this path. These checks do not provide Apple publisher verification; release apps remain ad hoc signed until Developer ID signing and notarization are configured.
+
+Automatic checks default to off for new installations. Existing preferences are preserved. Homebrew users should leave them off and use `brew update && brew upgrade --cask mauringo/tap/clipboard-assistant`.
+
+Versions through v1.6.2 use the legacy source-based updater, which needs Apple Command Line Tools, Swift 6+, and network access. Its helper remains bundled for compatibility with old releases building new tags. Starting with v1.6.1, protected, renamed, or App Translocation copies install into `~/Applications/Clipboard Assistant.app`; writable copies with the standard name update in place.
 
 ## Homebrew
 
@@ -40,7 +44,7 @@ brew update && brew upgrade --cask mauringo/tap/clipboard-assistant
 open "/Applications/Clipboard Assistant.app"
 ```
 
-**Recommend Homebrew-managed updates.** Turn off **Clipboard Assistant → Automatically Check for Updates**. Homebrew downloads a prebuilt app and avoids the local source build performed by the optional in-app updater. A Swift compiler is not required for Homebrew installation or updates.
+**Recommend Homebrew-managed updates.** Turn off **Clipboard Assistant → Automatically Check for Updates**. Homebrew downloads a prebuilt app and keeps update control in Terminal. The optional in-app updater also uses prebuilt downloads starting with v1.7.0; older versions build locally. A Swift compiler is not required for Homebrew installation or updates.
 
 When switching from manual installation, quit the app and move the previous app bundle to Trash, including any duplicate in `~/Applications`, before installing the cask. Preserve `~/Library/Application Support/ClipboardAssistant` to keep saved history. Session-only history is lost when quitting. If a custom Homebrew app directory is configured, reopen the app from that directory.
 

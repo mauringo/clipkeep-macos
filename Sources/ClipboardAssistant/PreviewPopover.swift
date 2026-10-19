@@ -1,10 +1,14 @@
 import AppKit
+import Combine
 import SwiftUI
 
 /// Defers native close requests until the preview's shared animation finishes.
 @MainActor
 final class PreviewPopover: NSObject, ObservableObject, NSPopoverDelegate {
+    enum Navigation { case previous, next, activate, focusSearch }
+    let navigation = PassthroughSubject<Navigation, Never>()
     let popover = NSPopover()
+    private var keyboardMonitor: Any?
     @Published private(set) var isClosing = false
     private var closeTask: Task<Void, Never>?
 
@@ -37,7 +41,28 @@ final class PreviewPopover: NSObject, ObservableObject, NSPopoverDelegate {
         reset()
     }
 
+    func popoverDidShow(_ notification: Notification) {
+        navigation.send(.focusSearch)
+        if let keyboardMonitor { NSEvent.removeMonitor(keyboardMonitor) }
+        keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self, self.popover.isShown, !self.isClosing,
+                  event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty else { return event }
+            // Arrow keys in selectable preview text retain their normal editing behavior.
+            if let text = self.popover.contentViewController?.view.window?.firstResponder as? NSTextView,
+               !text.isFieldEditor { return event }
+            switch event.keyCode {
+            case 125: self.navigation.send(.next)
+            case 126: self.navigation.send(.previous)
+            case 36, 76: self.navigation.send(.activate)
+            default: return event
+            }
+            return nil
+        }
+    }
+
     func popoverDidClose(_ notification: Notification) {
+        if let keyboardMonitor { NSEvent.removeMonitor(keyboardMonitor) }
+        keyboardMonitor = nil
         reset()
     }
 

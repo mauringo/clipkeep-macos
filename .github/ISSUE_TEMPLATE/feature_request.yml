@@ -1,0 +1,29 @@
+name: Suggest a feature
+description: Help shape a simpler, more useful native clipboard app.
+title: "Feature: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        What would make Clipboard Assistant more useful in your day?
+        Describe the task you want to make easier. Small improvements are welcome.
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What are you trying to do?
+      description: Tell us about the copying, finding, or saving task you want to improve.
+      placeholder: "When I copy several links for a project, I want to…"
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: What would you like the app to do?
+      description: Describe the simplest version that would help. Mockups are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: How do you do this today?
+      description: Optional—share your current workaround or another app's approach.

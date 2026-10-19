@@ -16,10 +16,11 @@ struct MenuBarView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @MenuState private var search = ""
     @MenuState private var selectedID: UUID?
+    @FocusState private var searchFocused: Bool
 
     private var entries: [ClipboardEntry] {
-        monitor.entries.filter {
-            search.isEmpty || ($0.text ?? "Copied image").localizedCaseInsensitiveContains(search)
+        monitor.displayEntries.filter {
+            search.isEmpty || $0.searchableText.localizedCaseInsensitiveContains(search)
         }
     }
 
@@ -49,7 +50,7 @@ struct MenuBarView: View {
             HStack(spacing: 0) {
                 VStack(spacing: 0) {
                     TextField("Search clipboard history", text: $search)
-                        .textFieldStyle(.roundedBorder).padding(12)
+                        .textFieldStyle(.roundedBorder).padding(12).focused($searchFocused)
                     Divider()
                     if entries.isEmpty {
                         VStack(spacing: 10) {
@@ -59,6 +60,7 @@ struct MenuBarView: View {
                         }.foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity, maxHeight: .infinity).padding()
                     } else {
+                        ScrollViewReader { proxy in
                         ScrollView {
                             LazyVStack(spacing: 0) {
                                 ForEach(entries) { entry in
@@ -87,9 +89,18 @@ struct MenuBarView: View {
                                     }
                                     .padding(.horizontal, 12).padding(.vertical, 4)
                                     .background(selectedID == entry.id ? Color.accentColor.opacity(0.14) : Color.clear)
+                                    .id(entry.id)
+                                    .contextMenu {
+                                        Button(entry.isPinned ? "Unpin" : "Pin") { monitor.togglePin(entry) }
+                                        Button("Copy") { copyAndClose(entry) }
+                                        Button("Save to…") { monitor.save(entry) }
+                                    }
                                     Divider().padding(.leading, 44)
                                 }
                             }
+                        }.onChange(of: selectedID) { id in
+                            if let id { proxy.scrollTo(id) }
+                        }
                         }
                     }
                 }.frame(width: 310)
@@ -118,6 +129,14 @@ struct MenuBarView: View {
         .disabled(presentation.isClosing)
         .onAppear { reconcileSelection() }
         .onChange(of: entries.map(\.id)) { _ in reconcileSelection() }
+        .onReceive(presentation.navigation) { navigation in
+            switch navigation {
+            case .focusSearch: searchFocused = true
+            case .activate: if let selected { copyAndClose(selected) }
+            case .previous: moveSelection(by: -1)
+            case .next: moveSelection(by: 1)
+            }
+        }
         .onExitCommand(perform: dismiss)
         .alert("Clipboard Assistant", isPresented: Binding(
             get: { monitor.errorMessage != nil },
@@ -138,14 +157,16 @@ struct MenuBarView: View {
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
+                    Button { monitor.togglePin(entry) } label: {
+                        Image(systemName: entry.isPinned ? "pin.fill" : "pin")
+                    }.help(entry.isPinned ? "Unpin item" : "Keep this item pinned")
+                        .accessibilityLabel(entry.isPinned ? "Unpin item" : "Pin item")
                 }.padding(16)
                 Divider()
                 if let text = entry.text {
                     TextPreview(text: text).id(entry.id)
                 } else if let data = entry.imageData, let image = NSImage(data: data) {
-                    Image(nsImage: image).resizable().scaledToFit()
-                        .padding(20).frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .onDrag { EntryDragProvider.make(for: entry) }
+                    ImageEntryPreview(entry: entry, image: image, monitor: monitor, didCopyText: dismiss)
                 }
             }
         } else {
@@ -154,6 +175,12 @@ struct MenuBarView: View {
                 Text("Select an entry to preview").font(.callout)
             }.foregroundStyle(.secondary)
         }
+    }
+
+    private func moveSelection(by offset: Int) {
+        guard !entries.isEmpty else { return }
+        let current = entries.firstIndex { $0.id == selectedID } ?? (offset > 0 ? -1 : entries.count)
+        selectedID = entries[min(max(current + offset, 0), entries.count - 1)].id
     }
 
     private func reconcileSelection() {

@@ -10,6 +10,65 @@ final class ClipboardMonitor: ObservableObject {
         didSet { lastChangeCount = NSPasteboard.general.changeCount }
     }
     @Published var errorMessage: String?
+    @Published private(set) var capturePreferences = CapturePreferences.load()
+    private var recognitionTask: Task<Void, Never>?
+    @Published private(set) var recognitionFailures: Set<UUID> = []
+
+    func retryRecognition(_ id: UUID) {
+        recognitionFailures.remove(id)
+        scheduleRecognition()
+    }
+
+    var displayEntries: [ClipboardEntry] {
+        entries.filter(\.isPinned) + entries.filter { !$0.isPinned }
+    }
+
+    func setCapturePreferences(_ preferences: CapturePreferences) {
+        preferences.save()
+        capturePreferences = preferences
+        if preferences.recognizeTextInImages { scheduleRecognition() }
+        else { recognitionTask?.cancel() }
+    }
+
+    func togglePin(_ entry: ClipboardEntry) {
+        do {
+            try repository?.setPinned(!entry.isPinned, id: entry.id)
+            entries = repository?.entries ?? []
+        } catch { errorMessage = error.localizedDescription }
+    }
+
+    func copyText(_ text: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        lastChangeCount = pasteboard.changeCount
+    }
+
+    private func scheduleRecognition() {
+        guard capturePreferences.recognizeTextInImages, recognitionTask == nil else { return }
+        recognitionTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer {
+                self.recognitionTask = nil
+                if Task.isCancelled, self.capturePreferences.recognizeTextInImages { self.scheduleRecognition() }
+            }
+            while !Task.isCancelled, self.capturePreferences.recognizeTextInImages,
+                  let entry = self.entries.first(where: {
+                      $0.kind == .image && $0.recognizedText == nil && !self.recognitionFailures.contains($0.id)
+                  }), let data = entry.imageData {
+                do {
+                    let text = try await Task.detached(priority: .utility) {
+                        try ImageTextRecognition.recognize(data)
+                    }.value
+                    guard !Task.isCancelled, self.capturePreferences.recognizeTextInImages else { return }
+                    try self.repository?.setRecognizedText(text, id: entry.id)
+                    self.entries = self.repository?.entries ?? []
+                } catch {
+                    self.recognitionFailures.insert(entry.id)
+                }
+            }
+        }
+    }
     private var repository: HistoryRepository?
     private var timer: Timer?
     private var lastChangeCount = -1
@@ -40,6 +99,7 @@ final class ClipboardMonitor: ObservableObject {
     func start() {
         guard timer == nil else { return }
         captureClipboard()
+        scheduleRecognition()
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.captureClipboard() }
         }
@@ -50,6 +110,10 @@ final class ClipboardMonitor: ObservableObject {
         guard pasteboard.changeCount != lastChangeCount else { return }
         lastChangeCount = pasteboard.changeCount
         guard isMonitoring, let repository else { return }
+        let source = pasteboard.string(forType: NSPasteboard.PasteboardType("org.nspasteboard.source"))
+        let sourceID = source.flatMap { $0.isEmpty ? nil : $0 } ?? NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        guard capturePreferences.shouldCapture(types: Set((pasteboard.types ?? []).map(\.rawValue)),
+                                               sourceBundleID: sourceID) else { return }
 
         let entry: ClipboardEntry
         if let data = pasteboard.data(forType: .png) ?? pasteboard.data(forType: .tiff),
@@ -62,7 +126,7 @@ final class ClipboardMonitor: ObservableObject {
             return
         }
         do {
-            if try repository.insert(entry) { entries = repository.entries }
+            if try repository.insert(entry) { entries = repository.entries; scheduleRecognition() }
         } catch {
             errorMessage = "Could not save clipboard history: \(error.localizedDescription)"
         }
