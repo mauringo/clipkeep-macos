@@ -6,7 +6,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     private var window: NSWindow!
     private var settingsWindow: NSWindow?
     private var statusItem: NSStatusItem!
-    private let popover = NSPopover()
+    private let previewPresentation = PreviewPopover()
+    private var popover: NSPopover { previewPresentation.popover }
     private var applicationMenu: NSMenu!
     private var monitor: ClipboardMonitor!
     private let updateChecker = UpdateChecker()
@@ -58,10 +59,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         window.setFrameAutosaveName("ClipboardHistoryWindow")
         window.center()
         window.delegate = self
-        popover.behavior = .transient
         popover.contentSize = NSSize(width: 760, height: 520)
         popover.contentViewController = NSHostingController(rootView: MenuBarView(
             monitor: monitor,
+            presentation: previewPresentation,
             expand: { [weak self] in self?.showWindow() },
             showSettings: { [weak self] in self?.showSettings() },
             checkForUpdates: { [weak self] in
@@ -82,11 +83,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     }
 
     private func dismissPreview() {
-        // The preview animates its content before closing. Avoid a second native
-        // animation, so its state can reset offscreen for the next opening.
-        popover.animates = false
-        popover.performClose(nil)
-        popover.animates = true
+        previewPresentation.dismiss()
     }
 
     @objc private func togglePopover() {

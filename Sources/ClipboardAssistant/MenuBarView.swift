@@ -7,6 +7,7 @@ private typealias MenuState<Value> = SwiftUI.State<Value>
 /// Transient history and preview attached to the menu-bar icon.
 struct MenuBarView: View {
     @ObservedObject var monitor: ClipboardMonitor
+    @ObservedObject var presentation: PreviewPopover
     let expand: () -> Void
     let showSettings: () -> Void
     let checkForUpdates: () -> Void
@@ -15,7 +16,6 @@ struct MenuBarView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @MenuState private var search = ""
     @MenuState private var selectedID: UUID?
-    @MenuState private var isClosing = false
 
     private var entries: [ClipboardEntry] {
         monitor.entries.filter {
@@ -101,10 +101,6 @@ struct MenuBarView: View {
             HStack {
                 Button(action: showSettings) { Label("Settings…", systemImage: "gearshape") }
                 Spacer()
-                if isClosing {
-                    Label("Copied", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green).font(.callout)
-                }
                 Menu {
                     Button("Check for Updates…", action: checkForUpdates)
                     Divider()
@@ -116,10 +112,10 @@ struct MenuBarView: View {
             }.padding(14)
         }
         .frame(width: 760, height: 520)
-        .scaleEffect(isClosing && !reduceMotion ? 0.97 : 1, anchor: .top)
-        .offset(y: isClosing && !reduceMotion ? -8 : 0)
-        .opacity(isClosing ? 0 : 1)
-        .disabled(isClosing)
+        .scaleEffect(presentation.isClosing && !reduceMotion ? 0.97 : 1, anchor: .top)
+        .offset(y: presentation.isClosing && !reduceMotion ? -8 : 0)
+        .opacity(presentation.isClosing ? 0 : 1)
+        .disabled(presentation.isClosing)
         .onAppear { reconcileSelection() }
         .onChange(of: entries.map(\.id)) { _ in reconcileSelection() }
         .onExitCommand(perform: dismiss)
@@ -165,15 +161,8 @@ struct MenuBarView: View {
     }
 
     private func copyAndClose(_ entry: ClipboardEntry) {
-        guard !isClosing else { return }
+        guard !presentation.isClosing else { return }
         monitor.copy(entry)
-        withAnimation(.easeInOut(duration: 0.22)) { isClosing = true }
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 220_000_000)
-            dismiss()
-            var transaction = Transaction()
-            transaction.disablesAnimations = true
-            withTransaction(transaction) { isClosing = false }
-        }
+        dismiss()
     }
 }
