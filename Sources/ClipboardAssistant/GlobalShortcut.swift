@@ -156,8 +156,15 @@ final class ShortcutRecordButton: NSButton {
                 Task { @MainActor in self?.finish() }
             }
         // Intercept locally before menu key equivalents (such as ⌘Q) can run.
-        recordingMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            guard let self, self.isRecording, self.window?.firstResponder === self else { return event }
+        recordingMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .leftMouseDown, .rightMouseDown]) { [weak self] event in
+            guard let self, self.isRecording else { return event }
+            if event.type != .keyDown {
+                if event.window !== self.window || !self.bounds.contains(self.convert(event.locationInWindow, from: nil)) {
+                    self.finish()
+                }
+                return event
+            }
+            guard event.window === self.window, self.window?.firstResponder === self else { return event }
             self.keyDown(with: event)
             return nil
         }

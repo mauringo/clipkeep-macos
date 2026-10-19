@@ -44,7 +44,7 @@ Clipboard Assistant remembers your copied texts and images, ready to search, pre
 
 | Feature | What you can do |
 | --- | --- |
-| 💾 **Copy or save in one click** | Use the two icons beside each entry to copy and close, or save the original as UTF-8 text or PNG. |
+| 💾 **Copy or save in one click** | Use the two icons beside each entry to copy and close, or save the original as UTF-8 text or PNG. Delete one entry with the preview’s trash icon or its row’s right-click menu. |
 | 📁 **Titled batch exports** | Select multiple items, choose a shared title or individual names, preview filenames, and save everything into one folder. Existing files are preserved. |
 | 🖱️ **Drag into your workflow** | Drag original text or images into another app or Finder. |
 | ✨ **A native macOS experience** | Use a menu-bar preview, a full history window, familiar controls, and a short closing animation that respects Reduce Motion. |

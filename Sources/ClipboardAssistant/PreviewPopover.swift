@@ -46,6 +46,8 @@ final class PreviewPopover: NSObject, ObservableObject, NSPopoverDelegate {
         if let keyboardMonitor { NSEvent.removeMonitor(keyboardMonitor) }
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self, self.popover.isShown, !self.isClosing,
+                  let window = self.popover.contentViewController?.view.window,
+                  event.window === window, window.isKeyWindow,
                   event.modifierFlags.intersection([.command, .control, .option, .shift]).isEmpty else { return event }
             // Arrow keys in selectable preview text retain their normal editing behavior.
             if let text = self.popover.contentViewController?.view.window?.firstResponder as? NSTextView,

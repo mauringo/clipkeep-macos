@@ -94,6 +94,8 @@ struct MenuBarView: View {
                                         Button(entry.isPinned ? "Unpin" : "Pin") { monitor.togglePin(entry) }
                                         Button("Copy") { copyAndClose(entry) }
                                         Button("Save to…") { monitor.save(entry) }
+                                        Divider()
+                                        Button("Delete", role: .destructive) { monitor.remove(entry) }
                                     }
                                     Divider().padding(.leading, 44)
                                 }
@@ -161,6 +163,9 @@ struct MenuBarView: View {
                         Image(systemName: entry.isPinned ? "pin.fill" : "pin")
                     }.help(entry.isPinned ? "Unpin item" : "Keep this item pinned")
                         .accessibilityLabel(entry.isPinned ? "Unpin item" : "Pin item")
+                    Button(role: .destructive) { monitor.remove(entry) } label: {
+                        Image(systemName: "trash")
+                    }.help("Delete this history entry").accessibilityLabel("Delete this history entry")
                 }.padding(16)
                 Divider()
                 if let text = entry.text {

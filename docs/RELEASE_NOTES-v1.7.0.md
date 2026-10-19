@@ -2,6 +2,7 @@
 
 - **A tunable global shortcut:** record your own Command, Option, or Control combination in Settings. The default is Control–Option–V. Conflicts keep the previous shortcut. Disable it or reset it at any time.
 - **Keyboard navigation:** type to search, use Up/Down to select, and Return to copy and close the menu-bar preview. Text-preview selection keeps its normal arrow-key behavior.
+- **Delete from the preview:** a trash icon removes the displayed entry from history without changing the system clipboard. Delete a single row through its right-click menu too.
 - **Pinned favorites:** pin text and images from the preview or context menu. Pins appear first and are exempt from the recent-history limit. Their persistence follows the existing history-retention setting; cleaning history still clears pins.
 - **Capture exclusions:** choose apps to exclude from future capture. Confidential, transient, and automatically generated clipboard markers are respected by default. This depends on the source app providing markers; unmarked secrets cannot be identified reliably.
 - **On-device image text:** recognize text from captured images in the background, search it, preview it, and copy it separately. Images never leave the Mac and original exports stay intact. Recognition can be disabled in Settings.

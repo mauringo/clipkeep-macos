@@ -173,6 +173,9 @@ struct HistoryView: View {
                                 Image(systemName: entry.isPinned ? "pin.fill" : "pin")
                             }.help(entry.isPinned ? "Unpin item" : "Keep this item pinned")
                                 .accessibilityLabel(entry.isPinned ? "Unpin item" : "Pin item")
+                            Button(role: .destructive) { monitor.remove(entry) } label: {
+                                Image(systemName: "trash")
+                            }.help("Delete this history entry").accessibilityLabel("Delete this history entry")
                             Label("Drag", systemImage: "hand.draw")
                                 .padding(6)
                                 .contentShape(Rectangle())
