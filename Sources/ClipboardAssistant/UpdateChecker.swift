@@ -88,13 +88,16 @@ final class UpdateChecker {
     private func installUpdate(tag: String) {
         guard updateProcess == nil else { return }
         let appURL = Bundle.main.bundleURL
-        guard appURL.lastPathComponent == "Clipboard Assistant.app",
-              FileManager.default.isWritableFile(atPath: appURL.deletingLastPathComponent().path),
-              let script = Bundle.main.url(forResource: "update-from-source", withExtension: "sh") else {
-            showMessage("Move the app before updating", "Place Clipboard Assistant.app in a writable Applications folder, then try again.")
+        guard let script = Bundle.main.url(forResource: "update-from-source", withExtension: "sh") else {
+            showMessage("Could not start update", "The update helper is missing. Reinstall Clipboard Assistant and try again.")
             return
         }
         do {
+            let destination = UpdateDestination.resolve(appURL: appURL,
+                parentIsWritable: FileManager.default.isWritableFile(atPath: appURL.deletingLastPathComponent().path),
+                homeDirectory: FileManager.default.homeDirectoryForCurrentUser)
+            try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(),
+                withIntermediateDirectories: true)
             let logDirectory = try FileManager.default.url(for: .applicationSupportDirectory,
                 in: .userDomainMask, appropriateFor: nil, create: true)
                 .appendingPathComponent("ClipboardAssistant/Updates", isDirectory: true)
@@ -107,7 +110,7 @@ final class UpdateChecker {
             try log.truncate(atOffset: 0)
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            process.arguments = [script.path, tag, appURL.path]
+            process.arguments = [script.path, tag, destination.path]
             process.standardOutput = log
             process.standardError = log
             process.terminationHandler = { [weak self] process in
@@ -126,13 +129,14 @@ final class UpdateChecker {
             }
             try process.run()
             updateProcess = process
-            let panel = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 130),
+            let panel = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 160),
                 styleMask: [.titled, .closable], backing: .buffered, defer: false)
             panel.title = "Updating Clipboard Assistant"
             panel.isReleasedWhenClosed = false
             let label = NSTextField(wrappingLabelWithString:
-                "Downloading and building \(tag)…\nYou can keep using the app. It will quit and reopen when installation is ready. Closing this window leaves the update running.")
-            label.frame = NSRect(x: 20, y: 45, width: 420, height: 65)
+                "Downloading and building \(tag)…\nYou can keep using the app. It will quit and reopen when installation is ready. Closing this window leaves the update running." +
+                (destination == appURL ? "" : " The updated app will be installed in your Applications folder."))
+            label.frame = NSRect(x: 20, y: 45, width: 420, height: 95)
             let spinner = NSProgressIndicator(frame: NSRect(x: 20, y: 16, width: 420, height: 16))
             spinner.style = .bar
             spinner.isIndeterminate = true

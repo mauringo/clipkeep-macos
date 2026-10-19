@@ -6,6 +6,12 @@
 - Copy closes the dropdown with a short fade, scale, and upward motion, without adding a duplicate to history. Reduce Motion uses a fade only.
 - Text previews retain selection, clickable links, JSON/YAML formatting, and the Original switch.
 
+## Screenshots
+
+![v1.6 menu-bar history with capture controls, row actions, and a text preview](images/clipboard-assistant-v1.6-menu-bar.png)
+
+![v1.6 expanded history with selection, text and image filters, and export controls](images/clipboard-assistant-v1.6-history.png)
+
 ## Install or update
 
 In the app, choose **… → Check for Updates… → Install Update**. The updater downloads this release's source, builds it on your Mac, and replaces and reopens the app. Apple Command Line Tools with Swift 6+ and internet access are required. Saved history is preserved; session-only history is lost when the app restarts.

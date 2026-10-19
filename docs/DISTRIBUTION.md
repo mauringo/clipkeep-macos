@@ -16,7 +16,7 @@ The first v1.3.0 binary release is Apple Silicon only: the local Swift 6.4 toolc
 
 Current release builds are ad hoc signed, not Developer ID signed or notarized. Downloaded builds may be blocked by Gatekeeper. There is no signing identity installed on the release machine. A smooth binary release needs Apple Developer Program membership, a Developer ID Application certificate, hardened runtime signing, notarization using `xcrun notarytool`, and stapling using `xcrun stapler`. Both the app and any distributed installer need an appropriate signing/notarization process. Never remove quarantine attributes automatically.
 
-Source-built updates are locally compiled and ad hoc signed; they are not notarized vendor binaries. Users need Apple Command Line Tools, Swift 6+, network access, and a writable install directory. Builds execute source and build tooling from the trusted project release and its dependency.
+Source-built updates are locally compiled and ad hoc signed; they are not notarized vendor binaries. Users need Apple Command Line Tools, Swift 6+, network access, and a writable install directory. Starting with v1.6.1, protected, renamed, or App Translocation copies install updates into `~/Applications/Clipboard Assistant.app`; writable copies with the standard name update in place. Builds execute source and build tooling from the trusted project release and its dependency.
 
 ## Homebrew
 

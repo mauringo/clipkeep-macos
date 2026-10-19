@@ -10,7 +10,7 @@ Keep the things you copy. Find them again. Save what matters.
 
 </div>
 
-![Clipboard Assistant in dark mode, showing searchable text and image history alongside a clickable link preview](docs/images/clipboard-assistant.png)
+![Clipboard Assistant v1.6 menu-bar dropdown with Start/Stop capture, Copy and Save icons on each row, and a text preview on the right](docs/images/clipboard-assistant-v1.6-menu-bar.png)
 
 Clipboard Assistant remembers your copied texts and images, ready to search, preview, copy again, or save to a file. Keep **100 entries by default**, choose a limit from **1 to 1,000**, and decide whether history survives a restart. It lives in your macOS menu bar and keeps working when you close its window.
 
@@ -67,6 +67,8 @@ For scripted installation, run `zsh scripts/install-app.sh`. This installs the e
 
 Drag a row’s **three-line handle** or the **Drag** handle above its preview into another app. Images can also be dragged directly from the preview. Text is offered as the original plain text and a `.txt` file; images are offered as PNG data and a `.png` file. The receiving app chooses what it accepts. For part of a text entry, select text in the preview and drag the selection using macOS’s usual text behavior.
 
+![Clipboard Assistant v1.6 full history window with text and image filters, selected items, a text preview, and batch export controls](docs/images/clipboard-assistant-v1.6-history.png)
+
 In the full window, click an entry to show its preview. Use its checkbox, **⌘-click**, or **Shift-click** to select several entries; **Select all** selects the entries matching your current search and filter. A regular click returns to one selected entry. Hidden or deleted entries are removed from the selection.
 
 Choose **Save selected…** to export the selection. Enter a shared title (for example, `Project notes`) to create names such as `Project notes-001.txt` and `Project notes-002.png`. You can also enter an individual title for each item and see its filename before saving. Choose **Choose folder & save…**, then select an existing folder or create one. Files are saved directly into that folder in history order; original text and PNG bytes are preserved. Existing files are kept, and matching names receive a numbered suffix. After saving, choose **Show in Finder** to open the folder.
@@ -79,9 +81,13 @@ Click the menu-bar clipboard icon to open history with a preview on the right. S
 
 The app checks GitHub’s latest stable release on launch and every day while running. Use **Clipboard Assistant → Check for Updates…** to check immediately. Turn off **Automatically Check for Updates** in the same menu to disable background checks. Checks send version metadata requests to GitHub; clipboard contents are never included.
 
-Choose **Install Update** when a newer release is found. The app clones that release tag from `mauringo/clipkeep-macos`, builds it locally, stages and verifies the new app, quits, replaces itself, and reopens. It needs **Apple Command Line Tools with Swift 6+**, internet access (including the Yams dependency), and an app installed in a writable folder under the name **Clipboard Assistant.app**. Run `xcode-select --install` once if developer tools are missing. This builds release source on your Mac and uses an ad hoc signature. It does not require a separate updater command.
+Choose **Install Update** when a newer release is found. The app clones that release tag from `mauringo/clipkeep-macos`, builds it locally, stages and verifies the new app, quits, replaces itself, and reopens. It needs **Apple Command Line Tools with Swift 6+**, internet access (including the Yams dependency), and a writable installation destination. Starting with v1.6.1, writable copies named **Clipboard Assistant.app** update in place. If the running copy is protected, renamed, or relocated by macOS App Translocation, the updater installs into **~/Applications/Clipboard Assistant.app**, creating that folder if needed. Run `xcode-select --install` once if developer tools are missing. This builds release source on your Mac and uses an ad hoc signature. It does not require a separate updater command.
 
 You can continue using the app during the build. A failed download or build leaves the existing app installed. Update logs are in `~/Library/Application Support/ClipboardAssistant/Updates/update.log`. Installing replaces the app bundle; history retention settings still apply, so memory-only history is lost when the app restarts. If you rename or move the running app, wait until updating finishes first.
+
+### If updating says “Move the app before updating”
+
+Versions through v1.6.0 show this message when the running app cannot be replaced at its current location, including copies that macOS runs from a temporary App Translocation folder. Quit the app, run **Install Clipboard Assistant.app** from the new build or release archive once, and launch **~/Applications/Clipboard Assistant.app**. Saved history is preserved; session-only history is lost when quitting. In v1.6.1 and later, the updater chooses your user Applications folder automatically when the current copy cannot be updated in place.
 
 ## History settings
 
