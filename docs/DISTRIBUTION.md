@@ -22,14 +22,41 @@ Source-built updates are locally compiled and ad hoc signed; they are not notari
 
 This native GUI app fits a **cask**, rather than a source formula. `Casks/clipboard-assistant.rb` describes the published Apple Silicon archive using its exact SHA-256 checksum, app name, and macOS minimum.
 
-For a personal tap, create a public repository named `homebrew-tap` under `mauringo`, copy the cask into its `Casks` directory, and publish it. Users can then run:
+### Install and update from the personal tap
+
+The public tap is [mauringo/homebrew-tap](https://github.com/mauringo/homebrew-tap). With Homebrew installed, users can install the prebuilt Apple Silicon app with:
 
 ```sh
-brew tap mauringo/tap
 brew install --cask mauringo/tap/clipboard-assistant
+open "/Applications/Clipboard Assistant.app"
 ```
 
-The tap repository is separate from this application repository and is not created by the build. Do not advertise that install command as available until the tap is published. Homebrew can subsequently update the installed binary with `brew upgrade --cask clipboard-assistant`. For Homebrew-managed installs, turn off the app’s automatic checks if you want Homebrew to manage all updates.
+This command adds the tap automatically. Homebrew may ask users to trust the third-party cask. The tap is independent of the official Homebrew catalog; current downloads remain ad hoc signed and are not notarized, so macOS may block first launch.
+
+For updates, quit the app and run:
+
+```sh
+brew update && brew upgrade --cask mauringo/tap/clipboard-assistant
+open "/Applications/Clipboard Assistant.app"
+```
+
+**Recommend Homebrew-managed updates.** Turn off **Clipboard Assistant → Automatically Check for Updates**. Homebrew downloads a prebuilt app and avoids the local source build performed by the optional in-app updater. A Swift compiler is not required for Homebrew installation or updates.
+
+When switching from manual installation, quit the app and move the previous app bundle to Trash, including any duplicate in `~/Applications`, before installing the cask. Preserve `~/Library/Application Support/ClipboardAssistant` to keep saved history. Session-only history is lost when quitting. If a custom Homebrew app directory is configured, reopen the app from that directory.
+
+### Maintain the tap
+
+The tap is a separate repository. For every release, update the version and SHA-256 checksum in this repository's `Casks/clipboard-assistant.rb`, copy that cask to the tap, and push both repositories. A new GitHub release alone does not update Homebrew's version metadata. Run:
+
+```sh
+brew style --cask mauringo/tap/clipboard-assistant
+brew info --cask --json=v2 mauringo/tap/clipboard-assistant
+brew fetch --cask mauringo/tap/clipboard-assistant
+```
+
+The tap's CI checks the checked-out cask's style, metadata, and release download checksum. These checks do not claim Apple notarization or official catalog acceptance.
+
+### Official Homebrew catalog
 
 Official `homebrew/cask` inclusion requires a stable, verifiable upstream download, correct version and checksum, an app that passes current Gatekeeper checks without bypasses, and compliance with the shared acceptance policy, including adoption/maintenance requirements. A new repository and an ad hoc signed archive are not ready for official submission. Sign and notarize first, establish usage, run `brew audit --cask --online` and `brew style`, then submit a pull request following the current policies.
 

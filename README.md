@@ -1,12 +1,24 @@
 <div align="center">
 
-# 📋 Clipboard Assistant
+<img src="docs/images/clipboard-assistant-icon.png" width="112" height="112" alt="Clipboard Assistant app icon">
+
+# Clipboard Assistant
 
 **A little memory for your Mac’s clipboard.**
 
 Keep the things you copy. Find them again. Save what matters.
 
-**macOS 13+ · Native Swift app · Local storage · Text & images**
+[![Build and test](https://github.com/mauringo/clipkeep-macos/actions/workflows/ci.yml/badge.svg)](https://github.com/mauringo/clipkeep-macos/actions/workflows/ci.yml)
+[![Cask checks](https://github.com/mauringo/homebrew-tap/actions/workflows/cask.yml/badge.svg)](https://github.com/mauringo/homebrew-tap/actions/workflows/cask.yml)
+[![Latest release](https://img.shields.io/github/v/release/mauringo/clipkeep-macos?color=6366f1)](https://github.com/mauringo/clipkeep-macos/releases/latest)
+[![MIT license](https://img.shields.io/github/license/mauringo/clipkeep-macos)](LICENSE)
+[![macOS 13+](https://img.shields.io/badge/macOS-13%2B-111827?logo=apple)](docs/DISTRIBUTION.md)
+[![Swift](https://img.shields.io/badge/Swift-native-F05138?logo=swift&logoColor=white)](Package.swift)
+[![Homebrew tap](https://img.shields.io/badge/Homebrew-personal%20tap-FBB040?logo=homebrew&logoColor=white)](https://github.com/mauringo/homebrew-tap)
+
+[Install](#install-with-homebrew-recommended) · [Update](#update-from-terminal-recommended) · [Releases](https://github.com/mauringo/clipkeep-macos/releases) · [Report an issue](https://github.com/mauringo/clipkeep-macos/issues)
+
+**Native macOS app · Local storage · Text & images · No account required**
 
 </div>
 
@@ -31,6 +43,23 @@ Clipboard Assistant remembers your copied texts and images, ready to search, pre
 **Your source stays intact.** JSON and YAML formatting only changes the preview. **Copy** and **Save to…** always use the original clipboard text, including whitespace and comments.
 
 ## Get started
+
+### Install with Homebrew (recommended)
+
+With [Homebrew](https://brew.sh) installed:
+
+```sh
+brew install --cask mauringo/tap/clipboard-assistant
+open "/Applications/Clipboard Assistant.app"
+```
+
+This uses our [personal Homebrew tap](https://github.com/mauringo/homebrew-tap) and downloads the prebuilt app. No Swift compiler or local build is needed. The current package supports **Apple Silicon Macs running macOS 13 or later**. Homebrew may ask you to trust this third-party cask.
+
+Already installed manually? Quit the app and move the old **Clipboard Assistant.app** bundle to Trash before switching to Homebrew, including any duplicate in **~/Applications**. Keep **~/Library/Application Support/ClipboardAssistant** to preserve saved history. Session-only history is lost when quitting. Then run the install command above.
+
+After installing, turn off **Clipboard Assistant → Automatically Check for Updates** and use the [Terminal update command](#update-from-terminal-recommended). This keeps Homebrew in charge of app versions.
+
+Current downloads are ad hoc signed and are not Apple notarized. macOS may block first launch; Homebrew does not remove that limitation. See [distribution notes](docs/DISTRIBUTION.md).
 
 ### Install without Terminal
 
@@ -79,11 +108,31 @@ Click the menu-bar clipboard icon to open history with a preview on the right. S
 
 ## Updates
 
-The app checks GitHub’s latest stable release on launch and every day while running. Use **Clipboard Assistant → Check for Updates…** to check immediately. Turn off **Automatically Check for Updates** in the same menu to disable background checks. Checks send version metadata requests to GitHub; clipboard contents are never included.
+### Update from Terminal (recommended)
 
-Choose **Install Update** when a newer release is found. The app clones that release tag from `mauringo/clipkeep-macos`, builds it locally, stages and verifies the new app, quits, replaces itself, and reopens. It needs **Apple Command Line Tools with Swift 6+**, internet access (including the Yams dependency), and a writable installation destination. Starting with v1.6.1, writable copies named **Clipboard Assistant.app** update in place. If the running copy is protected, renamed, or relocated by macOS App Translocation, the updater installs into **~/Applications/Clipboard Assistant.app**, creating that folder if needed. Run `xcode-select --install` once if developer tools are missing. This builds release source on your Mac and uses an ad hoc signature. It does not require a separate updater command.
+For Homebrew installations, quit Clipboard Assistant, then run:
 
-You can continue using the app during the build. A failed download or build leaves the existing app installed. Update logs are in `~/Library/Application Support/ClipboardAssistant/Updates/update.log`. Installing replaces the app bundle; history retention settings still apply, so memory-only history is lost when the app restarts. If you rename or move the running app, wait until updating finishes first.
+```sh
+brew update && brew upgrade --cask mauringo/tap/clipboard-assistant
+open "/Applications/Clipboard Assistant.app"
+```
+
+Homebrew refreshes the tap and downloads a prebuilt release when a newer version is available. This avoids the local compilation used by the in-app updater. If you have not installed with Homebrew yet, follow the [installation steps](#install-with-homebrew-recommended) once first.
+
+Turn off **Clipboard Assistant → Automatically Check for Updates** to stop background update prompts. We recommend using Homebrew for both installation and updates, rather than mixing it with the app's updater.
+
+Saved history survives an app replacement. Session-only history is lost when quitting. If you use a custom Homebrew app directory, use that directory when reopening the app.
+
+### Other ways to update
+
+- **Finder installer:** download the latest installer archive from [Releases](https://github.com/mauringo/clipkeep-macos/releases/latest), unzip it, and open **Install Clipboard Assistant.app**. This installs into **~/Applications** and reopens the app. It does not compile source.
+- **From a source checkout:** run `git pull --ff-only`, then `zsh scripts/build-app.sh` and `zsh scripts/install-app.sh`. This requires Swift 6+ and Apple Command Line Tools and follows the checked-out branch.
+
+### Optional in-app updater
+
+**… → Check for Updates… → Install Update** remains available for users who prefer it. It downloads the stable release's source and builds on your Mac, so it can take longer and requires **Apple Command Line Tools with Swift 6+**, internet access, and a writable installation destination. Homebrew and the Finder installer use prebuilt apps instead.
+
+Automatic checks run on launch and daily while enabled. They request release metadata from GitHub; clipboard contents are never included. Starting with v1.6.1, protected, renamed, or macOS App Translocation copies install updates into **~/Applications/Clipboard Assistant.app**. Writable copies with the standard name update in place. Build logs are in **~/Library/Application Support/ClipboardAssistant/Updates/update.log**.
 
 ### If updating says “Move the app before updating”
 

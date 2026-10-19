@@ -7,8 +7,8 @@ cask "clipboard-assistant" do
   desc "Local clipboard history with text, image, JSON and YAML previews"
   homepage "https://github.com/mauringo/clipkeep-macos"
 
-  depends_on macos: ">= :ventura"
   depends_on arch: :arm64
+  depends_on macos: :ventura
 
   app "Clipboard Assistant.app"
 end
