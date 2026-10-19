@@ -60,7 +60,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         window.setFrameAutosaveName("ClipboardHistoryWindow")
         window.center()
         window.delegate = self
-        popover.contentSize = NSSize(width: 760, height: 520)
+        popover.contentSize = previewPresentation.contentSize
         popover.contentViewController = NSHostingController(rootView: MenuBarView(
             monitor: monitor,
             presentation: previewPresentation,

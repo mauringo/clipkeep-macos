@@ -2,6 +2,8 @@
 
 - **A tunable global shortcut:** record your own Command, Option, or Control combination in Settings. The default is Control–Option–V. Conflicts keep the previous shortcut. Disable it or reset it at any time.
 - **Keyboard navigation:** type to search, use Up/Down to select, and Return to copy and close the menu-bar preview. Text-preview selection keeps its normal arrow-key behavior.
+- **Compact mode:** hide or show the right-hand preview with the sidebar button. The dropdown shrinks when the preview is hidden, and remembers your choice.
+- **Save all:** export every history entry to a folder using shared or individual titles, including pins and items hidden by search or filters. Available in the dropdown and full history window.
 - **Delete from the preview:** a trash icon removes the displayed entry from history without changing the system clipboard. Delete a single row through its right-click menu too.
 - **Pinned favorites:** pin text and images from the preview or context menu. Pins appear first and are exempt from the recent-history limit. Their persistence follows the existing history-retention setting; cleaning history still clears pins.
 - **Capture exclusions:** choose apps to exclude from future capture. Confidential, transient, and automatically generated clipboard markers are respected by default. This depends on the source app providing markers; unmarked secrets cannot be identified reliably.

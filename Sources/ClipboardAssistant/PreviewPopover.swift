@@ -10,6 +10,17 @@ final class PreviewPopover: NSObject, ObservableObject, NSPopoverDelegate {
     let popover = NSPopover()
     private var keyboardMonitor: Any?
     @Published private(set) var isClosing = false
+    @Published private(set) var showsPreview = UserDefaults.standard.object(forKey: "showsMenuPreview") as? Bool ?? true
+
+    var contentSize: NSSize {
+        NSSize(width: showsPreview ? 760 : 350, height: showsPreview ? 520 : 430)
+    }
+
+    func togglePreviewPane() {
+        showsPreview.toggle()
+        UserDefaults.standard.set(showsPreview, forKey: "showsMenuPreview")
+        popover.contentSize = contentSize
+    }
     private var closeTask: Task<Void, Never>?
 
     override init() {
@@ -19,7 +30,9 @@ final class PreviewPopover: NSObject, ObservableObject, NSPopoverDelegate {
     }
 
     func dismiss() {
-        guard popover.isShown, !isClosing else { return }
+        guard popover.isShown, !isClosing,
+              popover.contentViewController?.view.window?.attachedSheet == nil,
+              NSApp.modalWindow == nil else { return }
         withAnimation(.easeInOut(duration: 0.22)) { isClosing = true }
         closeTask = Task { @MainActor [weak self] in
             do { try await Task.sleep(nanoseconds: 220_000_000) }

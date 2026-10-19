@@ -16,6 +16,7 @@ struct MenuBarView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @MenuState private var search = ""
     @MenuState private var selectedID: UUID?
+    @MenuState private var exportRequest: ExportRequest?
     @FocusState private var searchFocused: Bool
 
     private var entries: [ClipboardEntry] {
@@ -38,10 +39,19 @@ struct MenuBarView: View {
                 }
                 Spacer()
                 Button { monitor.isMonitoring.toggle() } label: {
-                    Label(monitor.isMonitoring ? "Stop" : "Start",
-                          systemImage: monitor.isMonitoring ? "stop.fill" : "play.fill")
+                    HStack(spacing: 5) {
+                        Image(systemName: monitor.isMonitoring ? "stop.fill" : "play.fill")
+                        if presentation.showsPreview { Text(monitor.isMonitoring ? "Stop" : "Start") }
+                    }
                 }
                 .help(monitor.isMonitoring ? "Stop clipboard capture" : "Start clipboard capture")
+                .accessibilityLabel(monitor.isMonitoring ? "Stop clipboard capture" : "Start clipboard capture")
+                Button {
+                    presentation.togglePreviewPane()
+                    searchFocused = true
+                } label: { Image(systemName: "sidebar.right") }
+                    .help(presentation.showsPreview ? "Hide preview" : "Show preview")
+                    .accessibilityLabel(presentation.showsPreview ? "Hide preview" : "Show preview")
                 Button(action: expand) {
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
                 }.help("Open the full app").accessibilityLabel("Open the full app")
@@ -105,15 +115,22 @@ struct MenuBarView: View {
                         }
                         }
                     }
-                }.frame(width: 310)
-                Divider()
-                preview.frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color(nsColor: .textBackgroundColor))
+                }.frame(width: presentation.showsPreview ? 310 : 350)
+                if presentation.showsPreview {
+                    Divider()
+                    preview.frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(nsColor: .textBackgroundColor))
+                }
             }
             Divider()
             HStack {
                 Button(action: showSettings) { Label("Settings…", systemImage: "gearshape") }
                 Spacer()
+                Button {
+                    exportRequest = ExportRequest(entries: monitor.displayEntries)
+                } label: { Label("Save all…", systemImage: "square.and.arrow.down") }
+                    .disabled(monitor.entries.isEmpty)
+                    .help("Save all history items to a folder, including items hidden by search")
                 Menu {
                     Button("Check for Updates…", action: checkForUpdates)
                     Divider()
@@ -124,7 +141,7 @@ struct MenuBarView: View {
                     .accessibilityLabel("More options")
             }.padding(14)
         }
-        .frame(width: 760, height: 520)
+        .frame(width: presentation.contentSize.width, height: presentation.contentSize.height)
         .scaleEffect(presentation.isClosing && !reduceMotion ? 0.97 : 1, anchor: .top)
         .offset(y: presentation.isClosing && !reduceMotion ? -8 : 0)
         .opacity(presentation.isClosing ? 0 : 1)
@@ -140,6 +157,9 @@ struct MenuBarView: View {
             }
         }
         .onExitCommand(perform: dismiss)
+        .sheet(item: $exportRequest) { request in
+            ExportSelectionView(entries: request.entries)
+        }
         .alert("Clipboard Assistant", isPresented: Binding(
             get: { monitor.errorMessage != nil },
             set: { if !$0 { monitor.errorMessage = nil } }

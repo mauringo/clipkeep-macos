@@ -45,9 +45,9 @@ Clipboard Assistant remembers your copied texts and images, ready to search, pre
 | Feature | What you can do |
 | --- | --- |
 | 💾 **Copy or save in one click** | Use the two icons beside each entry to copy and close, or save the original as UTF-8 text or PNG. Delete one entry with the preview’s trash icon or its row’s right-click menu. |
-| 📁 **Titled batch exports** | Select multiple items, choose a shared title or individual names, preview filenames, and save everything into one folder. Existing files are preserved. |
+| 📁 **Titled batch exports** | Select multiple items, or choose **Save all…** for every history entry. Add shared or individual titles, preview filenames, and export into one folder without overwriting existing files. |
 | 🖱️ **Drag into your workflow** | Drag original text or images into another app or Finder. |
-| ✨ **A native macOS experience** | Use a menu-bar preview, a full history window, familiar controls, and a short closing animation that respects Reduce Motion. |
+| ✨ **A native macOS experience** | Toggle the right-hand preview to switch between a compact list and a wider preview. Use familiar macOS controls and closing animations that respect Reduce Motion. |
 
 ### Keep control.
 
@@ -117,6 +117,10 @@ The default shortcut is **⌃⌥V** (Control–Option–V). In **Settings → Ke
 
 While the menu-bar search field is focused, type to filter, use **↑/↓** to select, and press **Return** to copy the original item and close. Arrow keys in the text preview keep their usual text-selection behavior.
 
+### Compact or expanded preview
+
+Click the **sidebar icon** at the top of the menu-bar dropdown to hide or show its right-hand preview. With the preview hidden, the dropdown shrinks to a compact list. Your choice is remembered between openings and restarts. Search, keyboard selection, Copy, Save, and each row's right-click menu remain available.
+
 ### Pin your favorites
 
 Click the **pin** in an item's preview, or right-click its row and choose **Pin**. Pinned items appear first and stay outside the recent-history limit. Unpinning reapplies the limit, so an old item may be removed immediately. Pins survive restarts when **Keep history after restart or reboot** is enabled; session-only mode still clears everything on quit. **Clean history** removes pins too.
@@ -146,7 +150,7 @@ Drag a row’s **three-line handle** or the **Drag** handle above its preview in
 
 In the full window, click an entry to show its preview. Use its checkbox, **⌘-click**, or **Shift-click** to select several entries; **Select all** selects the entries matching your current search and filter. A regular click returns to one selected entry. Hidden or deleted entries are removed from the selection.
 
-Choose **Save selected…** to export the selection. Enter a shared title (for example, `Project notes`) to create names such as `Project notes-001.txt` and `Project notes-002.png`. You can also enter an individual title for each item and see its filename before saving. Choose **Choose folder & save…**, then select an existing folder or create one. Files are saved directly into that folder in history order; original text and PNG bytes are preserved. Existing files are kept, and matching names receive a numbered suffix. After saving, choose **Show in Finder** to open the folder.
+Choose **Save all…** in either window to export all history items, including pins and entries hidden by search or filters. Or choose **Save selected…** in the full window to export only the selection. Enter a shared title (for example, `Project notes`) to create names such as `Project notes-001.txt` and `Project notes-002.png`. You can also enter an individual title for each item and see its filename before saving. Choose **Choose folder & save…**, then select an existing folder or create one. Files are saved directly into that folder in history order; original text and PNG bytes are preserved. Existing files are kept, and matching names receive a numbered suffix. After saving, choose **Show in Finder** to open the folder.
 
 Right-click any entry for copy, save, and delete actions. Use **Clean history…** to remove all entries.
 

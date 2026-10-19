@@ -60,6 +60,11 @@ struct HistoryView: View {
                 }
                 .help(monitor.isMonitoring ? "Pause capture" : "Resume capture")
                 .accessibilityLabel(monitor.isMonitoring ? "Pause capture" : "Resume capture")
+                Button {
+                    exportRequest = ExportRequest(entries: monitor.displayEntries)
+                } label: { Label("Save all…", systemImage: "square.and.arrow.down") }
+                    .disabled(monitor.entries.isEmpty)
+                    .help("Save every history item to a folder, including items hidden by filters")
                 Button(action: showSettings) { Image(systemName: "gearshape") }
                     .help("Settings").accessibilityLabel("Settings")
             }

@@ -1,6 +1,6 @@
 cask "clipboard-assistant" do
   version "1.7.0"
-  sha256 "b9303dabe0f7e463a4d6077349c68db01ba6df5f56be49df26b294ea2fd838dc"
+  sha256 "400b3a0ef31cf88465d4b4be7ea28ac3fe54c21a9b105648e7d89b813946f43c"
 
   url "https://github.com/mauringo/clipkeep-macos/releases/download/v#{version}/ClipboardAssistant-#{version}-arm64.zip"
   name "Clipboard Assistant"
