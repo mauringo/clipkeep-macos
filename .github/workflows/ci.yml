@@ -1,0 +1,16 @@
+name: Build and test
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+      - run: zsh Tests/UpdaterTests/run.sh
+      - run: zsh scripts/build-app.sh --universal
+      - run: codesign --verify --deep --strict "dist/Clipboard Assistant.app"

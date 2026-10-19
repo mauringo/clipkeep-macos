@@ -7,11 +7,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     private var settingsWindow: NSWindow?
     private var statusItem: NSStatusItem!
     private var monitor: ClipboardMonitor!
+    private let updateChecker = UpdateChecker()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         monitor = ClipboardMonitor()
         let menu = NSMenu()
         menu.addItem(withTitle: "About Clipboard Assistant", action: #selector(showAbout), keyEquivalent: "")
+        menu.addItem(withTitle: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: "")
+        menu.addItem(withTitle: "Automatically Check for Updates", action: #selector(toggleAutomaticUpdates), keyEquivalent: "")
         menu.addItem(.separator())
         menu.addItem(withTitle: "Show Clipboard History", action: #selector(showWindow), keyEquivalent: "0")
         menu.addItem(withTitle: "Pause Capture", action: #selector(toggleCapture), keyEquivalent: "")
@@ -53,9 +56,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         window.delegate = self
         showWindow()
         monitor.start()
+        updateChecker.start()
     }
 
     func menuWillOpen(_ menu: NSMenu) {
+        menu.items.first(where: { $0.action == #selector(toggleAutomaticUpdates) })?.state =
+            updateChecker.automaticallyChecks ? .on : .off
         menu.items.first(where: { $0.action == #selector(toggleCapture) })?.title =
             monitor.isMonitoring ? "Pause Capture" : "Resume Capture"
     }
@@ -82,6 +88,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             settings.makeKeyAndOrderFront(nil)
         }
         NSApp.activate(ignoringOtherApps: true)
+    }
+    @objc private func checkForUpdates() { updateChecker.check(manual: true) }
+    @objc private func toggleAutomaticUpdates() {
+        updateChecker.automaticallyChecks.toggle()
+        updateChecker.checkAutomaticallyIfDue()
     }
     @objc private func quit() { NSApp.terminate(nil) }
     @objc private func showAbout() { NSApp.orderFrontStandardAboutPanel(nil) }

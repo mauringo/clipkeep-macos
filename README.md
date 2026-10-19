@@ -26,13 +26,16 @@ Clipboard Assistant remembers your copied texts and images, ready to search, pre
 | 💾 Save to a file | Export text as UTF-8 `.txt` and images as `.png`, using the native macOS save dialog. |
 | ⏸️ Capture controls | Pause and resume from the window or the Clipboard Assistant application menu. |
 | ⚙️ History settings | Keep history across restarts or use memory-only capture; clean all entries with one button. |
-| 🏠 Stays on your Mac | No account, cloud sync, or network service. |
+| 🏠 Stays on your Mac | Local clipboard storage; GitHub is contacted for update checks. |
 
 **Your source stays intact.** JSON and YAML formatting only changes the preview. **Copy** and **Save to…** always use the original clipboard text, including whitespace and comments.
 
 ## Get started
 
 ### Install without Terminal
+
+Download the app archive from [GitHub Releases](https://github.com/mauringo/clipkeep-macos/releases/latest), unzip it, and move **Clipboard Assistant.app** into Applications. The v1.3.0 binary archive supports Apple Silicon Macs. Intel users can build from source. Current builds use an ad hoc signature, without Apple notarization; macOS may block downloaded builds. See [distribution notes](docs/DISTRIBUTION.md).
+
 
 Double-click **Install Clipboard Assistant.app** in `dist`. It contains the complete app, installs it in **~/Applications**, and opens it. No administrator password or developer tools are required to install or run the built app. Updates quit the running copy before replacing it; history follows your existing retention settings.
 
@@ -68,6 +71,14 @@ Right-click any entry for copy, save, and delete actions. Use **Clean history…
 
 Closing the window leaves capture running. Click the menu bar clipboard icon to open history directly. Pause capture from the window or the **Clipboard Assistant** application menu; use that menu or **⌘Q** to quit.
 
+## Updates
+
+The app checks GitHub’s latest stable release on launch and every day while running. Use **Clipboard Assistant → Check for Updates…** to check immediately. Turn off **Automatically Check for Updates** in the same menu to disable background checks. Checks send version metadata requests to GitHub; clipboard contents are never included.
+
+Choose **Install Update** when a newer release is found. The app clones that release tag from `mauringo/clipkeep-macos`, builds it locally, stages and verifies the new app, quits, replaces itself, and reopens. It needs **Apple Command Line Tools with Swift 6+**, internet access (including the Yams dependency), and an app installed in a writable folder under the name **Clipboard Assistant.app**. Run `xcode-select --install` once if developer tools are missing. This builds release source on your Mac and uses an ad hoc signature. It does not require a separate updater command.
+
+You can continue using the app during the build. A failed download or build leaves the existing app installed. Update logs are in `~/Library/Application Support/ClipboardAssistant/Updates/update.log`. Installing replaces the app bundle; history retention settings still apply, so memory-only history is lost when the app restarts. If you rename or move the running app, wait until updating finishes first.
+
 ## History settings
 
 Open **Settings…** from the **Clipboard Assistant** application menu, click the **gear** in the history window, or press **⌘,**.
@@ -99,13 +110,14 @@ When **Keep history after restart or reboot** is enabled, history is stored at:
 - Consecutive identical copies share one history entry. When history exceeds your configured limit, the oldest is removed.
 - The app captures plain text and PNG/TIFF clipboard images. Copying a file in Finder does not import its contents.
 - JSON and YAML mappings/lists are formatted automatically. Unrecognized or invalid input remains readable as plain text. YAML comments remain available in **Original** mode.
-- The build targets your Mac’s processor architecture and uses a local ad hoc signature. Distribution to other Macs requires Developer ID signing and notarization.
+- The build targets your Mac’s processor architecture and uses a local ad hoc signature. Public distribution without Gatekeeper friction requires Developer ID signing and notarization. Use `zsh scripts/build-app.sh --universal` to build both architectures.
 
 ## Development
 
 ```sh
 swift build
 swift test
+zsh Tests/UpdaterTests/run.sh
 ```
 
 | Location | Responsibility |
@@ -129,6 +141,8 @@ YAML previews use **[Yams](https://github.com/jpsim/Yams)**, an MIT-licensed Swi
 
 ## License
 
-Copyright © 2026 Clipboard Assistant contributors.
+Copyright © 2026 Mauro (mauringo).
 
 Released under the **[MIT License](LICENSE)**. You may use, modify, and redistribute the app, including commercially, provided you retain the copyright and license notice in all copies or substantial portions of the software. Third-party license notices must also be preserved.
+
+MIT attribution means retaining the copyright and license text in redistributed copies. You may sell the app or future versions; other recipients may also redistribute or sell MIT versions under those terms. Third-party rights remain with their owners.
