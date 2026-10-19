@@ -34,7 +34,7 @@ Clipboard Assistant remembers your copied texts and images, ready to search, pre
 
 ### Install without Terminal
 
-Download the app archive from [GitHub Releases](https://github.com/mauringo/clipkeep-macos/releases/latest), unzip it, and move **Clipboard Assistant.app** into Applications. The v1.3.0 binary archive supports Apple Silicon Macs. Intel users can build from source. Current builds use an ad hoc signature, without Apple notarization; macOS may block downloaded builds. See [distribution notes](docs/DISTRIBUTION.md).
+Download the app archive from [GitHub Releases](https://github.com/mauringo/clipkeep-macos/releases/latest), unzip it, and move **Clipboard Assistant.app** into Applications. The binary archive supports Apple Silicon Macs. Intel users can build from source. Current builds use an ad hoc signature, without Apple notarization; macOS may block downloaded builds. See [distribution notes](docs/DISTRIBUTION.md).
 
 
 Double-click **Install Clipboard Assistant.app** in `dist`. It contains the complete app, installs it in **~/Applications**, and opens it. No administrator password or developer tools are required to install or run the built app. Updates quit the running copy before replacing it; history follows your existing retention settings.
@@ -52,7 +52,7 @@ zsh scripts/build-app.sh
 open "dist/Clipboard Assistant.app"
 ```
 
-The build also creates the self-contained Finder installer. The app opens its history window and adds a **clipboard icon to your menu bar**. You can drag `dist/Clipboard Assistant.app` into **Applications** to keep it handy.
+The build also creates the self-contained Finder installer. The app starts quietly with a **clipboard icon in your menu bar**. Click it for the compact history dropdown; choose **Expand** to open the full app window and show its Dock icon. You can drag `dist/Clipboard Assistant.app` into **Applications** to keep it handy.
 
 Already built the app? Just double-click **Clipboard Assistant.app** inside `dist`.
 
@@ -69,7 +69,7 @@ Drag a history row or the **Drag** handle above its preview into another app. Im
 
 Right-click any entry for copy, save, and delete actions. Use **Clean history…** to remove all entries.
 
-Closing the window leaves capture running. Click the menu bar clipboard icon to open history directly. Pause capture from the window or the **Clipboard Assistant** application menu; use that menu or **⌘Q** to quit.
+Click the menu-bar clipboard icon to open a compact dropdown, like the Wi-Fi menu. Search and click an entry to copy it, or choose **Expand** for previews and export in the full app. The Dock icon appears while app windows are open and disappears when the last window closes; capture continues in the menu bar. Right-click the clipboard icon for app commands, or use the dropdown’s **…** menu to check for updates or quit.
 
 ## Updates
 
@@ -81,13 +81,14 @@ You can continue using the app during the build. A failed download or build leav
 
 ## History settings
 
-Open **Settings…** from the **Clipboard Assistant** application menu, click the **gear** in the history window, or press **⌘,**.
+Open **Settings…** from the menu-bar dropdown, the **Clipboard Assistant** application menu, or the **gear** in the full history window. You can also press **⌘,** while an app window is active.
 
-- **Keep history after restart or reboot:** enabled by default. Turn it off for memory-only history. Applying removes the saved archive immediately while keeping current entries available until you quit. The app then starts a new history each time it opens.
-- **Maximum entries:** choose any whole number from **1 to 1,000**. The default is **100**. Reducing the limit immediately removes the oldest entries when you click **Apply settings**.
+- **Start at login:** use the switch to launch quietly in the menu bar when you sign in to macOS. Install the app in Applications before enabling it. If macOS requires approval, use **Open Login Items Settings…**. The switch reflects macOS registration status; pending approval is shown explicitly.
+- **Keep history after restart or reboot:** enabled by default. This switch applies immediately. Turn it off for memory-only history. Switching it off removes the saved archive immediately while keeping current entries available until you quit. The app then starts a new history each time it opens.
+- **Maximum entries:** choose any whole number from **1 to 1,000**. The default is **100**. Reducing the limit immediately removes the oldest entries when you click **Apply limit**.
 - **Clean history…:** remove all current entries from the app, including saved history, after confirmation. This button is available in both Settings and the main window.
 
-Settings are remembered across restarts even when clipboard history is kept only in memory. This controls history retention; the app still needs to be opened after logging in.
+Settings are remembered across restarts even when clipboard history is kept only in memory. Turn on **Start at login** to start capture automatically after signing in.
 
 ## Your clipboard, your Mac
 

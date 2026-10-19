@@ -5,10 +5,12 @@
     <key>CFBundleDisplayName</key><string>Clipboard Assistant</string>
     <key>CFBundleIdentifier</key><string>com.clipboardassistant.mac</string>
     <key>CFBundleExecutable</key><string>ClipboardAssistant</string>
+    <key>CFBundleIconFile</key><string>ClipboardAssistant</string>
     <key>CFBundlePackageType</key><string>APPL</string>
-    <key>CFBundleShortVersionString</key><string>1.3.0</string>
-    <key>CFBundleVersion</key><string>4</string>
+    <key>CFBundleShortVersionString</key><string>1.4.0</string>
+    <key>CFBundleVersion</key><string>5</string>
     <key>LSMinimumSystemVersion</key><string>13.0</string>
+    <key>LSUIElement</key><true/>
     <key>NSHighResolutionCapable</key><true/>
     <key>NSHumanReadableCopyright</key><string>Copyright © 2026 Mauro (mauringo). MIT License.</string>
 </dict></plist>

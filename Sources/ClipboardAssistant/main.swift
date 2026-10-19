@@ -6,6 +6,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     private var window: NSWindow!
     private var settingsWindow: NSWindow?
     private var statusItem: NSStatusItem!
+    private let popover = NSPopover()
+    private var applicationMenu: NSMenu!
     private var monitor: ClipboardMonitor!
     private let updateChecker = UpdateChecker()
 
@@ -23,11 +25,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         menu.addItem(withTitle: "Quit Clipboard Assistant", action: #selector(quit), keyEquivalent: "q")
         for item in menu.items { item.target = self }
         menu.delegate = self
+        applicationMenu = menu
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "Clipboard Assistant")
-        // Open history directly when the menu-bar clipboard is clicked.
+        // Left-click opens the compact history; right-click offers app commands.
         statusItem.button?.target = self
-        statusItem.button?.action = #selector(showWindow)
+        statusItem.button?.action = #selector(togglePopover)
+        statusItem.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         statusItem.button?.toolTip = "Open Clipboard Assistant"
 
         let appMenu = NSMenu()
@@ -54,7 +58,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         window.setFrameAutosaveName("ClipboardHistoryWindow")
         window.center()
         window.delegate = self
-        showWindow()
+        popover.behavior = .transient
+        popover.contentSize = NSSize(width: 380, height: 500)
+        popover.contentViewController = NSHostingController(rootView: MenuBarView(
+            monitor: monitor,
+            expand: { [weak self] in self?.showWindow() },
+            showSettings: { [weak self] in self?.showSettings() },
+            checkForUpdates: { [weak self] in
+                self?.popover.performClose(nil)
+                self?.checkForUpdates()
+            },
+            dismiss: { [weak self] in self?.popover.performClose(nil) },
+            quit: { [weak self] in self?.quit() }))
         monitor.start()
         updateChecker.start()
     }
@@ -66,7 +81,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             monitor.isMonitoring ? "Pause Capture" : "Resume Capture"
     }
 
+    @objc private func togglePopover() {
+        guard let button = statusItem.button else { return }
+        if NSApp.currentEvent?.type == .rightMouseUp {
+            popover.performClose(nil)
+            statusItem.menu = applicationMenu
+            button.performClick(nil)
+            statusItem.menu = nil
+        } else if popover.isShown {
+            popover.performClose(nil)
+        } else {
+            NSApp.activate(ignoringOtherApps: true)
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            popover.contentViewController?.view.window?.makeKey()
+        }
+    }
+
     @objc private func showWindow() {
+        popover.performClose(nil)
+        NSApp.setActivationPolicy(.regular)
         if window.isMiniaturized { window.deminiaturize(nil) }
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -74,13 +107,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
 
     @objc private func toggleCapture() { monitor.isMonitoring.toggle() }
     @objc private func showSettings() {
+        popover.performClose(nil)
+        NSApp.setActivationPolicy(.regular)
         if let settingsWindow, settingsWindow.isVisible {
             settingsWindow.makeKeyAndOrderFront(nil)
         } else {
-            let settings = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 528, height: 420),
+            let settings = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 528, height: 650),
                                     styleMask: [.titled, .closable], backing: .buffered, defer: false)
             settings.title = "Clipboard Settings"
             settings.isReleasedWhenClosed = false
+            settings.delegate = self
             settings.contentView = NSHostingView(rootView: SettingsView(monitor: monitor,
                 dismiss: { [weak self] in self?.settingsWindow?.close() }))
             settings.center()
@@ -97,6 +133,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     @objc private func quit() { NSApp.terminate(nil) }
     @objc private func showAbout() { NSApp.orderFrontStandardAboutPanel(nil) }
 
+    func windowWillClose(_ notification: Notification) {
+        guard let closing = notification.object as? NSWindow else { return }
+        let hasOtherWindow = [window, settingsWindow].compactMap { $0 }.contains {
+            $0 !== closing && $0.isVisible
+        }
+        if !hasOtherWindow { NSApp.setActivationPolicy(.accessory) }
+    }
+
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         showWindow()
         return true
@@ -109,6 +153,6 @@ MainActor.assumeIsolated {
     let app = NSApplication.shared
     let delegate = AppDelegate()
     app.delegate = delegate
-    app.setActivationPolicy(.regular)
+    app.setActivationPolicy(.accessory)
     withExtendedLifetime(delegate) { app.run() }
 }

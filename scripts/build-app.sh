@@ -27,6 +27,7 @@ fi
 mv -f "$APP/Contents/MacOS/.ClipboardAssistant.new" "$APP/Contents/MacOS/ClipboardAssistant"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 mkdir -p "$APP/Contents/Resources"
+cp -f Resources/ClipboardAssistant.icns "$APP/Contents/Resources/ClipboardAssistant.icns"
 cp -f LICENSE "$APP/Contents/Resources/LICENSE.txt"
 cp -f .build/checkouts/Yams/LICENSE "$APP/Contents/Resources/Yams-LICENSE.txt"
 cp -f scripts/update-from-source.sh "$APP/Contents/Resources/update-from-source.sh"

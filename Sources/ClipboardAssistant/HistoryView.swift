@@ -179,7 +179,7 @@ struct HistoryView: View {
     }
 }
 
-private struct HistoryRow: View {
+struct HistoryRow: View {
     let entry: ClipboardEntry
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
